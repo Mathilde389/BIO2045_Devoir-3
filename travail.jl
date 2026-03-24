@@ -29,7 +29,7 @@ Random.seed!(123456)
 using CairoMakie
 
 # Code du cours: 
-sing CairoMakie
+using CairoMakie
 CairoMakie.activate!(px_per_unit=6.0)
 using StatsBase
 import Random
