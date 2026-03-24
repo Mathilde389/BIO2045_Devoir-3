@@ -10,11 +10,11 @@
 #      prenom: Mathilde
 #      matricule: 20267325 
 #      github: Mathilde389
-# nom: Rochon
-#      prenom: Marilou 
-#      matricule: XXXXXXXX
+#    - nom: Rochon
+#      prenom: Marilou
+#      matricule: XXXXXXXX 
 #      github: DeuxiAut
-# ---
+
 
 # # Introduction
 
