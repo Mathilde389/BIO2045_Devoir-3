@@ -24,15 +24,13 @@
 
 # ## Packages nécessaires
 
-import Random
-Random.seed!(123456)
 using CairoMakie
-
-# Code du cours: 
-using CairoMakie
-CairoMakie.activate!(px_per_unit=6.0)
 using StatsBase
 import Random
+
+# Initialisation
+Random.seed!(123456)
+CairoMakie.activate!(px_per_unit=6.0)
 
 # Puisque nous allons identifier des agents, nous utiliserons des UUIDs pour
 # leur donner un indentifiant unique:
@@ -49,7 +47,7 @@ UUIDs.uuid4()
 Base.@kwdef mutable struct Agent
     x::Int64 = 0
     y::Int64 = 0
-    clock::Int64 = 20
+    clock::Int64 = 21
     infectious::Bool = false
     id::UUIDs.UUID = UUIDs.uuid4()
 end
@@ -285,24 +283,6 @@ hm = scatter!(ax, pos, color=t, colormap=:navia, strokecolor=:black, strokewidth
 Colorbar(f[1, 2], hm, label="Time of infection")
 hidedecorations!(ax)
 current_figure()
-
-# # Modifications possibles
-
-# Pendant le cours, formulez des hypothèses sur l'effet de 
-
-# - la taille du paysage
-# - la taille de la population
-# - la dispersion sur une lattice toroïdale
-# - la durée de l'épidémie
-# - la survie de la population
-
-# Étudiez le code en profondeur avant de commencer. Est-ce que certains
-# paramètres sont représentés par des _magic numbers_ qui devraient être rendu
-# explicites?
-
-# Testez ces hypothèses en variant les paramètres du modèle. Est-ce qu'il existe
-# des situations dans lesquelles la population est protégée contre l'épidémie?
-# Des situations dans laquelle la structure spatiale de l'épidémie change?
 
 # # Figures supplémentaires
 
