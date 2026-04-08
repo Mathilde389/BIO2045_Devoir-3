@@ -49,6 +49,10 @@ Base.@kwdef mutable struct Agent
     y::Int64 = 0
     clock::Int64 = 21
     infectious::Bool = false
+      # Ajout code : vaccination
+    vaccinated::Bool = false        # est-ce que l'agent est vacciné ?
+    vaccine_delay::Int64 = 0        # délai avant que le vaccin soit actif
+
     id::UUIDs.UUID = UUIDs.uuid4()
 end
 
@@ -153,6 +157,32 @@ population = Population(L, 3750)
 
 rand(population).infectious = true
 
+# Budget et paramètres
+budget = 21000
+cost_vaccine = 17
+cost_test = 4
+
+intervention_started = false   # commence après premier décès
+first_death = false
+deaths = 0                     # compteur de morts
+
+# Fonction de test RAT (95% efficace)
+function test_agent(agent::Agent)
+    if agent.infectious
+        return rand() <= 0.95
+    else
+        return false
+    end
+end
+
+# Fonction de vaccination
+function vaccinate!(agent::Agent)
+    if !agent.vaccinated
+        agent.vaccinated = true
+        agent.vaccine_delay = 2   # actif après 2 jours
+    end
+end
+
 # Nous initialisons la simulation au temps 0, et nous allons la laisser se
 # dérouler au plus 1000 pas de temps:
 
@@ -194,12 +224,18 @@ while (length(infectious(population)) != 0) & (tick < maxlength)
     for agent in population
         move!(agent, L; torus=false)
     end
-
+##  Mise à jour du vaccin (délai)
+    for agent in population
+        if agent.vaccine_delay > 0
+            agent.vaccine_delay -= 1
+        end
+    end
     ## Infection
     for agent in Random.shuffle(infectious(population))
         neighbors = healthy(incell(agent, population))
         for neighbor in neighbors
-            if rand() <= 0.4
+            # Ajout: vaccin bloque infection
+            if rand() <= 0.4 && !(neighbor.vaccinated && neighbor.vaccine_delay == 0)
                 neighbor.infectious = true
                 push!(events, InfectionEvent(tick, agent.id, neighbor.id, agent.x, agent.y))
             end
@@ -213,6 +249,45 @@ while (length(infectious(population)) != 0) & (tick < maxlength)
 
     ## Remove agents that died
     population = filter(x -> x.clock > 0, population)
+
+# Ajout: détecter premier décès
+    if !first_death && after < before
+        intervention_started = true
+        first_death = true
+    end
+
+
+    # Ajout : compter les morts
+    deaths += (before - after)
+
+    ## Ajout : stratégie test + vaccination
+    if intervention_started && budget > 0
+        for agent in population
+
+            # Test RAT (Rapid Antigen Test)
+            if budget >= cost_test
+                budget -= cost_test
+
+                if test_agent(agent)
+
+                    # vacciner les voisins
+                    neighbors = incell(agent, population)
+
+                    for n in neighbors
+                        if budget >= cost_vaccine && !n.vaccinated
+                            vaccinate!(n)
+                            budget -= cost_vaccine
+                        end
+                    end
+
+                end
+            end
+
+            if budget <= 0
+                break
+            end
+        end
+    end
 
     ## Store population size
     S[tick] = length(healthy(population))
@@ -230,7 +305,7 @@ end
 S = S[1:tick];
 I = I[1:tick];
 
-#-
+# Analyse des résultats 
 
 f = Figure()
 ax = Axis(f[1, 1]; xlabel="Génération", ylabel="Population")
@@ -238,6 +313,10 @@ stairs!(ax, 1:tick, S, label="Susceptibles", color=:black)
 stairs!(ax, 1:tick, I, label="Infectieux", color=:red)
 axislegend(ax)
 current_figure()
+
+# Ajout: résultats finaux
+println("Nombre total de morts : ", deaths)
+println("Budget restant : ", budget)
 
 # ### Nombre de cas par individu infectieux
 
