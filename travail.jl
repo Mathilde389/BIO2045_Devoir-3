@@ -17,6 +17,34 @@
 # ---
 
 # # Introduction
+# Lors de propagation rapide de maladies infectieuses, comme les épidémies, il est essentiel
+# de comprendre comment différentes stratégies d’intervention permettent de limiter la transmission 
+# et la mortalité. En effet, cela représente un enjeu majeur en santé publique, surtout lorsque 
+# les individus infectés peuvent transmettre la maladie sans présenter de symptômes. 
+# Par exemple, dans le cas de la covid, le contrôle de la propagation de la maladie a été 
+# compliqué du aux individus porteurs asymptomatiques (SOURCE1).
+
+# Afin de contrôler les épidémies, il est important de mettre en place des outils comme
+# le dépistage et la vaccination. Les tests de dépistages, comme les tests antigéniques
+# rapides, permettent d’identifier rapidement les individus infectieux (SOURCE 2). 
+# Les individus infectieux peuvent alors prendre des mesures de sécurités afin de pas 
+# infecter le reste de la population. Les vaccins sont des mesures de prévention qui
+# permettent de donner de l’immunité protectrice comme celui pour l’hépatite B (SOURCE 3).
+# Cela empêche le développement de la maladie lors d’un contact par la suite. 
+
+# Cependant l’efficacité de ces stratégies dépend de plusieurs contraintes biologiques et
+# logistiques. Les tests de dépistage ne sont pas totalement fiable et peuvent donner 
+# des faux positives ou des faux négatifs. Les faux négatifs sont ceux qui mettent 
+# à risque le reste de la population puisqu’un individu infecté est identifié comme 
+# sain et peux donc infecter d’autres personnes. De plus les vaccins n’offrent pas 
+#toujours une protection immédiate, et il y a donc une période pendant laquelle les
+# individus vaccinés sont vulnérable. Le budget attribué aux stratégies de vaccination
+# est également une limite.
+
+# L’objectif de ce travail est donc de tester une stratégie de contrôle d’une maladie
+# infectieuse dans une population en agissant sur le dépistage et la vaccination des 
+# individus. 
+
 
 # # Présentation du modèle
 
@@ -49,7 +77,7 @@ UUIDs.uuid4()
 Base.@kwdef mutable struct Agent
     x::Int64 = 0
     y::Int64 = 0
-    clock::Int64 = 20
+    clock::Int64 = 21 # quand infectés, durée de vie est de 21 jours 
     infectious::Bool = false
     id::UUIDs.UUID = UUIDs.uuid4()
 end
