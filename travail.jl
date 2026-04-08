@@ -4,7 +4,7 @@
 # auteurs:
 #    - nom: Hammel-Monzon
 #      prenom: Valentina 
-#      matricule: XXXXXXXX
+#      matricule: 20274033
 #      github: premierAuteur
 #    - nom: Nguyen
 #      prenom: Mathilde
