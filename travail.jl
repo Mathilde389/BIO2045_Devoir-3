@@ -51,7 +51,6 @@
 # # Implémentation
 
 # ## Packages nécessaires
-
 using CairoMakie
 using StatsBase
 import Random
@@ -60,37 +59,30 @@ import Random
 Random.seed!(123456)
 CairoMakie.activate!(px_per_unit=6.0)
 
-# Puisque nous allons identifier des agents, nous utiliserons des UUIDs pour
-# leur donner un indentifiant unique:
-
+# Identifiants uniques pour chaque agent
 import UUIDs
 UUIDs.uuid4()
 
 # ## Création des types
 
-# Le premier type que nous avons besoin de créer est un agent. Les agents se
-# déplacent sur une lattice, et on doit donc suivre leur position. On doit
-# savoir si ils sont infectieux, et dans ce cas, combien de jours il leur reste:
-
+# Structure d'un agent (individu)
 Base.@kwdef mutable struct Agent
-    x::Int64 = 0
-    y::Int64 = 0
-    clock::Int64 = 21
-    infectious::Bool = false
-      # Ajout code : vaccination
-    vaccinated::Bool = false        # est-ce que l'agent est vacciné ?
-    vaccine_delay::Int64 = 0        # délai avant que le vaccin soit actif
+    x::Int64 = 0 # position x
+    y::Int64 = 0 # position y
+    clock::Int64 = 21 # durée de vie restante
+    infectious::Bool = false # état infectieux
+      # Vaccination
+    vaccinated::Bool = false        # vacciné ou non
+    vaccine_delay::Int64 = 0        # délai avant efficacité
 
-    id::UUIDs.UUID = UUIDs.uuid4()
+    id::UUIDs.UUID = UUIDs.uuid4() # identifiant unique
 end
 
-# On peut créer un agent pour vérifier:
+# Création d'un agent pour vérifier:
 
 Agent()
 
-# La deuxième structure dont nous aurons besoin est un paysage, qui est défini
-# par les coordonnées min/max sur les axes x et y:
-
+# Structure du paysage (espace de simulation)
 Base.@kwdef mutable struct Landscape
     xmin::Int64 = -25
     xmax::Int64 = 25
@@ -98,18 +90,15 @@ Base.@kwdef mutable struct Landscape
     ymax::Int64 = 25
 end
 
-# Nous allons maintenant créer un paysage de départ:
+# Création du paysage
 
 L = Landscape(xmin=-50, xmax=50, ymin=-50, ymax=50)
 
-# ## Création de nouvelles fonctions
+# ## Génération d'agents aléatoires
 
-# On va commencer par générer une fonction pour créer des agents au hasard. Il
-# existe une fonction pour faire ceci dans _Julia_: `rand`. Pour que notre code
-# soit facile a comprendre, nous allons donc ajouter une méthode à cette
-# fonction:
-
+# Crée un agent à une position aléatoire
 Random.rand(::Type{Agent}, L::Landscape) = Agent(x=rand(L.xmin:L.xmax), y=rand(L.ymin:L.ymax))
+# Crée plusieurs agents
 Random.rand(::Type{Agent}, L::Landscape, n::Int64) = [rand(Agent, L) for _ in 1:n]
 
 # Cette fonction nous permet donc de générer un nouvel agent dans un paysage:
@@ -120,8 +109,7 @@ rand(Agent, L)
 
 rand(Agent, L, 3)
 
-# On peut maintenant exprimer l'opération de déplacer un agent dans le paysage.
-# Puisque la position de l'agent va changer, notre fonction se termine par `!`:
+# Déplacement des agents
 
 function move!(A::Agent, L::Landscape; torus=true)
     A.x += rand(-1:1)
@@ -140,61 +128,50 @@ function move!(A::Agent, L::Landscape; torus=true)
     return A
 end
 
-# Nous pouvons maintenant définir des fonctions qui vont nous permettre de nous
-# simplifier la rédaction du code. Par exemple, on peut vérifier si un agent est
-# infectieux:
+# ## Fonctions utiles
 
+# Déterminer si l'agent est infectueux 
 isinfectious(agent::Agent) = agent.infectious
 
-# Et on peut donc vérifier si un agent est sain:
-
+# Déterminer si l'agent est sain
 ishealthy(agent::Agent) = !isinfectious(agent)
 
-# On peut maintenant définir une fonction pour prendre uniquement les agents qui
-# sont infectieux dans une population. Pour que ce soit clair, nous allons créer
-# un _alias_, `Population`, qui voudra dire `Vector{Agent}`:
-
+# Type population = liste d'agents
 const Population = Vector{Agent}
+
+# Filtrage des agents
 infectious(pop::Population) = filter(isinfectious, pop)
 healthy(pop::Population) = filter(ishealthy, pop)
 
-# Nous allons enfin écrire une fonction pour trouver l'ensemble des agents d'une
-# population qui sont dans la même cellule qu'un agent:
-
+# Agents dans la même cellule (même position)
 incell(target::Agent, pop::Population) = filter(ag -> (ag.x, ag.y) == (target.x, target.y), pop)
 
-# ## Paramètres initiaux
+# ## Initialisation
 
-# Notez qu'on peut réutiliser notre _alias_ pour écrire une fonction beaucoup plus
-# expressive pour générer une population:
-
+# Génération de la population
 function Population(L::Landscape, n::Integer)
     return rand(Agent, L, n)
 end
 
-# On en profite pour simplifier l'affichage de cette population:
-
+# Simplification de l'affichage de cette population
 Base.show(io::IO, ::MIME"text/plain", p::Population) = print(io, "Une population avec $(length(p)) agents")
 
-# Et on génère notre population initiale:
-
+# Génération de la population initiale
 population = Population(L, 3750)
 
-# Pour commencer la simulation, il faut identifier un cas index, que nous allons
-# choisir au hasard dans la population:
-
+# Cas index (premier infecté)
 rand(population).infectious = true
 
-# Budget et paramètres
-budget = 21000
-cost_vaccine = 17
-cost_test = 4
+# ## Paramètres intervention
+budget = 21000 # budget total
+cost_vaccine = 17 # coût vaccinated
+cost_test = 4 # coût test
 
 intervention_started = false   # commence après premier décès
 first_death = false
 deaths = 0                     # compteur de morts
 
-# Fonction de test RAT (95% efficace)
+# Fonction de test RAT (détection infection)
 function test_agent(agent::Agent)
     if agent.infectious
         return rand() <= 0.95
@@ -211,21 +188,15 @@ function vaccinate!(agent::Agent)
     end
 end
 
-# Nous initialisons la simulation au temps 0, et nous allons la laisser se
-# dérouler au plus 1000 pas de temps:
-
+# ## Simulation
 tick = 0
 maxlength = 2000
 
-# Pour étudier les résultats de la simulation, nous allons stocker la taille de
-# populations à chaque pas de temps:
+# Stockage des résultats
+S = zeros(Int64, maxlength); # susceptibles
+I = zeros(Int64, maxlength); # infectieux
 
-S = zeros(Int64, maxlength);
-I = zeros(Int64, maxlength);
-
-# Mais nous allons aussi stocker tous les évènements d'infection qui ont lieu
-# pendant la simulation:
-
+# Événements d'infection
 struct InfectionEvent
     time::Int64
     from::UUIDs.UUID
@@ -236,33 +207,29 @@ end
 
 events = InfectionEvent[]
 
-# Notez qu'on a contraint notre vecteur `events` a ne contenir _que_ des valeurs
-# du bon type, et que nos `InfectionEvent` sont immutables.
-
-# ## Simulation
+# Boucle principale
 
 while (length(infectious(population)) != 0) & (tick < maxlength)
 
-    ## On spécifie que nous utilisons les variables définies plus haut
     global tick, population
-
     tick += 1
 
-    ## Movement
+    # Déplacement
     for agent in population
         move!(agent, L; torus=false)
     end
-##  Mise à jour du vaccin (délai)
+
+    # Mise à jour délai vaccin
     for agent in population
         if agent.vaccine_delay > 0
             agent.vaccine_delay -= 1
         end
     end
-    ## Infection
+
+    # Infection (contact même cellule)
     for agent in Random.shuffle(infectious(population))
         neighbors = healthy(incell(agent, population))
         for neighbor in neighbors
-            # Ajout: vaccin bloque infection
             if rand() <= 0.4 && !(neighbor.vaccinated && neighbor.vaccine_delay == 0)
                 neighbor.infectious = true
                 push!(events, InfectionEvent(tick, agent.id, neighbor.id, agent.x, agent.y))
@@ -270,44 +237,38 @@ while (length(infectious(population)) != 0) & (tick < maxlength)
         end
     end
 
-    ## Change in survival
+    # Progression maladie
     for agent in infectious(population)
         agent.clock -= 1
     end
 
-    ## Remove agents that died
+    # Décès
+    before = length(population)
     population = filter(x -> x.clock > 0, population)
+    after = length(population)
 
-# Ajout: détecter premier décès
+    # Déclenche intervention au premier décès
     if !first_death && after < before
         intervention_started = true
         first_death = true
     end
 
-
-    # Ajout : compter les morts
     deaths += (before - after)
 
-    ## Ajout : stratégie test + vaccination
+    ## Test + vaccination 
     if intervention_started && budget > 0
         for agent in population
-
-            # Test RAT (Rapid Antigen Test)
             if budget >= cost_test
                 budget -= cost_test
 
-                if test_agent(agent)
-
-                    # vacciner les voisins
+                if test_agent(agent) # Vaccination en anneau : vaccination des contacts dans la même cellule 
                     neighbors = incell(agent, population)
-
                     for n in neighbors
                         if budget >= cost_vaccine && !n.vaccinated
                             vaccinate!(n)
                             budget -= cost_vaccine
                         end
                     end
-
                 end
             end
 
@@ -316,14 +277,18 @@ while (length(infectious(population)) != 0) & (tick < maxlength)
             end
         end
     end
-
-    ## Store population size
+# Ce bloque teste les individus un par un tant que le budget le permet. Lorsqu'un
+# Individu est détecté comme infecté, tous les individus présents au même endroit sont 
+# vaccinés si le budget le permet. Le processus continue jusqu'à ce que tous les agents
+# aient été considérés ou que le budget soit épuisé.
+    ## Stockage
     S[tick] = length(healthy(population))
     I[tick] = length(infectious(population))
 
-end
+end  
 
 # ## Analyse des résultats
+
 
 # ### Série temporelle
 
@@ -333,7 +298,7 @@ end
 S = S[1:tick];
 I = I[1:tick];
 
-# Analyse des résultats 
+# ## Analyse des résultats 
 
 f = Figure()
 ax = Axis(f[1, 1]; xlabel="Génération", ylabel="Population")
@@ -428,6 +393,7 @@ function foo(x, y)
 end
 
 # # Présentation des résultats
+
 
 # La figure suivante représente des valeurs aléatoires:
 
