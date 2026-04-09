@@ -54,6 +54,7 @@
 using CairoMakie
 using StatsBase
 import Random
+# METTRE AU BON ENDROIT (PROJECT.TOML)
 
 # Initialisation
 Random.seed!(123456)
@@ -69,7 +70,7 @@ UUIDs.uuid4()
 Base.@kwdef mutable struct Agent
     x::Int64 = 0 # position x
     y::Int64 = 0 # position y
-    clock::Int64 = 21 # durée de vie restante
+    clock::Int64 = 21 # durée de la maladie est de 21 jours
     infectious::Bool = false # état infectieux
       # Vaccination
     vaccinated::Bool = false        # vacciné ou non
@@ -84,10 +85,10 @@ Agent()
 
 # Structure du paysage (espace de simulation)
 Base.@kwdef mutable struct Landscape
-    xmin::Int64 = -25
-    xmax::Int64 = 25
-    ymin::Int64 = -25
-    ymax::Int64 = 25
+    xmin::Int64 = -50
+    xmax::Int64 = 50
+    ymin::Int64 = -50
+    ymax::Int64 = 50
 end
 
 # Création du paysage
@@ -188,13 +189,98 @@ function vaccinate!(agent::Agent)
     end
 end
 
+# JUSTIFIER CE BLOQUE
+function run_simulation(L, n, budget_total; with_intervention=true)
+
+    population = Population(L, 3750)
+    rand(population).infectious = true
+
+    budget = 21000
+    intervention_started = false
+    first_death = false
+    deaths = 0
+
+    tick = 0
+    maxlength = 2000
+
+    while (length(infectious(population)) != 0) & (tick < maxlength)
+
+        tick += 1
+
+        # Déplacement
+        for agent in population
+            move!(agent, L; torus=false)
+        end
+
+        # Mise à jour délai vaccin
+        for agent in population
+            if agent.vaccine_delay > 0
+                agent.vaccine_delay -= 1
+            end
+        end
+
+        # Infection
+        for agent in Random.shuffle(infectious(population))
+            neighbors = healthy(incell(agent, population))
+            for neighbor in neighbors
+                if rand() <= 0.4 && !(neighbor.vaccinated && neighbor.vaccine_delay == 0)
+                    neighbor.infectious = true
+                end
+            end
+        end
+
+        # Progression maladie
+        for agent in infectious(population)
+            agent.clock -= 1
+        end
+
+        # Décès
+        before = length(population)
+        population = filter(x -> x.clock > 0, population)
+        after = length(population)
+
+        # Déclenche intervention
+        if !first_death && after < before
+            intervention_started = true
+            first_death = true
+        end
+
+        deaths += (before - after)
+
+        # Intervention (activable)
+        if with_intervention && intervention_started && budget > 0
+            for agent in population
+                if budget >= cost_test
+                    budget -= cost_test
+
+                    if test_agent(agent)
+                        neighbors = incell(agent, population)
+                        for n in neighbors
+                            if budget >= cost_vaccine && !n.vaccinated
+                                vaccinate!(n)
+                                budget -= cost_vaccine
+                            end
+                        end
+                    end
+                end
+
+                if budget <= 0
+                    break
+                end
+            end
+        end
+    end
+
+    return deaths
+end
 # ## Simulation
 tick = 0
 maxlength = 2000
 
 # Stockage des résultats
-S = zeros(Int64, maxlength); # susceptibles
+S = zeros(Int64, maxlength); # sains
 I = zeros(Int64, maxlength); # infectieux
+D = zeros(Int64, maxlength)  # morts cumulés
 
 # Événements d'infection
 struct InfectionEvent
@@ -207,88 +293,51 @@ end
 
 events = InfectionEvent[]
 
-# Boucle principale
-
-while (length(infectious(population)) != 0) & (tick < maxlength)
-
-    global tick, population
-    tick += 1
-
-    # Déplacement
-    for agent in population
-        move!(agent, L; torus=false)
-    end
-
-    # Mise à jour délai vaccin
-    for agent in population
-        if agent.vaccine_delay > 0
-            agent.vaccine_delay -= 1
-        end
-    end
-
-    # Infection (contact même cellule)
-    for agent in Random.shuffle(infectious(population))
-        neighbors = healthy(incell(agent, population))
-        for neighbor in neighbors
-            if rand() <= 0.4 && !(neighbor.vaccinated && neighbor.vaccine_delay == 0)
-                neighbor.infectious = true
-                push!(events, InfectionEvent(tick, agent.id, neighbor.id, agent.x, agent.y))
-            end
-        end
-    end
-
-    # Progression maladie
-    for agent in infectious(population)
-        agent.clock -= 1
-    end
-
-    # Décès
-    before = length(population)
-    population = filter(x -> x.clock > 0, population)
-    after = length(population)
-
-    # Déclenche intervention au premier décès
-    if !first_death && after < before
-        intervention_started = true
-        first_death = true
-    end
-
-    deaths += (before - after)
-
-    ## Test + vaccination 
-    if intervention_started && budget > 0
-        for agent in population
-            if budget >= cost_test
-                budget -= cost_test
-
-                if test_agent(agent) # Vaccination en anneau : vaccination des contacts dans la même cellule 
-                    neighbors = incell(agent, population)
-                    for n in neighbors
-                        if budget >= cost_vaccine && !n.vaccinated
-                            vaccinate!(n)
-                            budget -= cost_vaccine
-                        end
-                    end
-                end
-            end
-
-            if budget <= 0
-                break
-            end
-        end
-    end
-# Ce bloque teste les individus un par un tant que le budget le permet. Lorsqu'un
-# Individu est détecté comme infecté, tous les individus présents au même endroit sont 
-# vaccinés si le budget le permet. Le processus continue jusqu'à ce que tous les agents
-# aient été considérés ou que le budget soit épuisé.
-    ## Stockage
-    S[tick] = length(healthy(population))
-    I[tick] = length(infectious(population))
-
-end  
+run_simulation()
 
 # ## Analyse des résultats
+using Statistics
 
+n_runs = 20
+
+deaths_with = [run_simulation(with_intervention=true) for _ in 1:n_runs]
+deaths_without = [run_simulation(with_intervention=false) for _ in 1:n_runs]
+
+mean_with = mean(deaths_with)
+mean_without = mean(deaths_without)
+
+var_with = var(deaths_with)
+var_without = var(deaths_without)
+
+println("\n RÉSULTATS SUR ", n_runs, " SIMULATIONS")
+
+println("\nAVEC intervention :")
+println("Moyenne des morts = ", mean_with)
+println("Variance = ", var_with)
+
+println("\nSANS intervention :")
+println("Moyenne des morts = ", mean_without)
+println("Variance = ", var_without)
+
+println("\nGAIN (morts évités) = ", mean_without - mean_with)
+
+f2 = Figure()
+
+ax = Axis(f2[1, 1];
+    xlabel="Simulation",
+    ylabel="Nombre de morts",
+    title="Comparaison des décès avec et sans intervention"
+)
+
+scatter!(ax, 1:n_runs, deaths_with, label="Avec intervention", color=:blue)
+scatter!(ax, 1:n_runs, deaths_without, label="Sans intervention", color=:red)
+
+axislegend(ax)
+
+current_figure()
+
+println("Moyenne morts avec intervention = ", mean(deaths_with))
+println("Moyenne morts sans intervention = ", mean(deaths_without))
 
 # ### Série temporelle
 
@@ -302,8 +351,9 @@ I = I[1:tick];
 
 f = Figure()
 ax = Axis(f[1, 1]; xlabel="Génération", ylabel="Population")
-stairs!(ax, 1:tick, S, label="Susceptibles", color=:black)
+stairs!(ax, 1:tick, S, label="Sains", color=:black)
 stairs!(ax, 1:tick, I, label="Infectieux", color=:red)
+stairs!(ax, 1:tick, D, label="Morts", color=:gray)
 axislegend(ax)
 current_figure()
 
