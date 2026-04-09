@@ -22,14 +22,14 @@
 # et la mortalité. En effet, cela représente un enjeu majeur en santé publique, surtout lorsque 
 # les individus infectés peuvent transmettre la maladie sans présenter de symptômes. 
 # Par exemple, dans le cas de la covid, le contrôle de la propagation de la maladie a été 
-# compliqué du aux individus porteurs asymptomatiques (SOURCE1).
+# compliqué du aux individus porteurs asymptomatiques (Zhang et al, 2021).
 
 # Afin de contrôler les épidémies, il est important de mettre en place des outils comme
 # le dépistage et la vaccination. Les tests de dépistages, comme les tests antigéniques
-# rapides, permettent d’identifier rapidement les individus infectieux (SOURCE 2). 
+# rapides, permettent d’identifier rapidement les individus infectieux (Mina et al, 2020). 
 # Les individus infectieux peuvent alors prendre des mesures de sécurités afin de pas 
 # infecter le reste de la population. Les vaccins sont des mesures de prévention qui
-# permettent de donner de l’immunité protectrice comme celui pour l’hépatite B (SOURCE 3).
+# permettent de donner de l’immunité protectrice comme celui pour l’hépatite B (Schillie et al, 2018).
 # Cela empêche le développement de la maladie lors d’un contact par la suite. 
 
 # Cependant l’efficacité de ces stratégies dépend de plusieurs contraintes biologiques et
