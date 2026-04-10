@@ -5,7 +5,7 @@
 #    - nom: Hammel-Monzon
 #      prenom: Valentina 
 #      matricule: 20274033
-#      github: premierAuteur
+#      github: valentina9000
 #    - nom: Nguyen
 #      prenom: Mathilde
 #      matricule: 20267325 
@@ -72,16 +72,12 @@ Base.@kwdef mutable struct Agent
     y::Int64 = 0 # position y
     clock::Int64 = 21 # durée de la maladie est de 21 jours
     infectious::Bool = false # état infectieux
+    tested::Bool = false 
       # Vaccination
     vaccinated::Bool = false        # vacciné ou non
-    vaccine_delay::Int64 = 0        # délai avant efficacité
-
+    days_after_vax::Int64 = 0        # délai avant efficacité
     id::UUIDs.UUID = UUIDs.uuid4() # identifiant unique
 end
-
-# Création d'un agent pour vérifier:
-
-Agent()
 
 # Structure du paysage (espace de simulation)
 Base.@kwdef mutable struct Landscape
@@ -150,7 +146,7 @@ incell(target::Agent, pop::Population) = filter(ag -> (ag.x, ag.y) == (target.x,
 # ## Initialisation
 
 # Génération de la population
-function Population(L::Landscape, n::Integer)
+function make_population(L::Landscape, n::Int)
     return rand(Agent, L, n)
 end
 
@@ -158,7 +154,7 @@ end
 Base.show(io::IO, ::MIME"text/plain", p::Population) = print(io, "Une population avec $(length(p)) agents")
 
 # Génération de la population initiale
-population = Population(L, 3750)
+population = make_population(L, 3750)
 
 # Cas index (premier infecté)
 rand(population).infectious = true
@@ -172,74 +168,80 @@ intervention_started = false   # commence après premier décès
 first_death = false
 deaths = 0                     # compteur de morts
 
-# Fonction de test RAT (détection infection)
-function test_agent(agent::Agent)
-    if agent.infectious
-        return rand() <= 0.95
-    else
-        return false
-    end
-end
-
 # Fonction de vaccination
 function vaccinate!(agent::Agent)
     if !agent.vaccinated
         agent.vaccinated = true
-        agent.vaccine_delay = 2   # actif après 2 jours
+        agent.days_after_vax = 0   # délai avant activation = 2 jours (immunité après 2 ticks)
     end
 end
 
-# JUSTIFIER CE BLOQUE
-function run_simulation(L, n, budget_total; with_intervention=true)
+# ## Simulation principale
+Base.@kwdef struct InfectionEvent
+    tick::Int
+    from::UUIDs.UUID
+    to::UUIDs.UUID
+    x::Int
+    y::Int
+end
 
-    population = Population(L, 3750)
+function run_simulation(L::Landscape, n::Int, budget_total; with_intervention=true)
+
+    population = make_population(L, n)
     rand(population).infectious = true
 
-    budget = 21000
+    events = InfectionEvent[]  
+
+    budget = budget_total
     intervention_started = false
     first_death = false
     deaths = 0
 
     tick = 0
     maxlength = 2000
+    S = Int[]
+    I = Int[]
+    D = Int[]
 
-    while (length(infectious(population)) != 0) & (tick < maxlength)
+    while (length(infectious(population)) > 0) && (tick < maxlength)
 
         tick += 1
 
         # Déplacement
         for agent in population
-            move!(agent, L; torus=false)
+            move!(agent, L)
         end
 
-        # Mise à jour délai vaccin
+        # Vaccination delay
         for agent in population
-            if agent.vaccine_delay > 0
-                agent.vaccine_delay -= 1
+            if agent.vaccinated
+                agent.days_after_vax += 1
             end
         end
 
         # Infection
         for agent in Random.shuffle(infectious(population))
-            neighbors = healthy(incell(agent, population))
-            for neighbor in neighbors
-                if rand() <= 0.4 && !(neighbor.vaccinated && neighbor.vaccine_delay == 0)
+            for neighbor in healthy(incell(agent, population))
+
+                immune = neighbor.vaccinated && neighbor.days_after_vax >= 2
+
+                if rand() <= 0.4 && !immune
                     neighbor.infectious = true
+                    push!(events, InfectionEvent(tick, agent.id, neighbor.id, neighbor.x, neighbor.y))
                 end
             end
         end
 
-        # Progression maladie
+        # Disease progression
         for agent in infectious(population)
             agent.clock -= 1
         end
 
-        # Décès
+        # Death
         before = length(population)
-        population = filter(x -> x.clock > 0, population)
+        population = filter(a -> a.clock > 0, population)
         after = length(population)
 
-        # Déclenche intervention
         if !first_death && after < before
             intervention_started = true
             first_death = true
@@ -247,18 +249,22 @@ function run_simulation(L, n, budget_total; with_intervention=true)
 
         deaths += (before - after)
 
-        # Intervention (activable)
+        # Intervention
         if with_intervention && intervention_started && budget > 0
-            for agent in population
-                if budget >= cost_test
-                    budget -= cost_test
 
-                    if test_agent(agent)
-                        neighbors = incell(agent, population)
-                        for n in neighbors
-                            if budget >= cost_vaccine && !n.vaccinated
-                                vaccinate!(n)
-                                budget -= cost_vaccine
+            for agent in population
+
+                if !agent.tested && budget >= 4
+                    budget -= 4
+                    agent.tested = true
+
+                    positive = agent.infectious ? rand() <= 0.95 : rand() <= 0.05
+
+                    if positive
+                        for neighbor in incell(agent, population)
+                            if budget >= 17 && !neighbor.vaccinated
+                                vaccinate!(neighbor)
+                                budget -= 17
                             end
                         end
                     end
@@ -269,39 +275,37 @@ function run_simulation(L, n, budget_total; with_intervention=true)
                 end
             end
         end
+        # Suivi des états
+        push!(S, length(healthy(population)))
+        push!(I, length(infectious(population)))
+        push!(D, deaths)
     end
 
-    return deaths
+    return deaths, budget, events, S, I, D
 end
-# ## Simulation
-tick = 0
-maxlength = 2000
-
-# Stockage des résultats
-S = zeros(Int64, maxlength); # sains
-I = zeros(Int64, maxlength); # infectieux
-D = zeros(Int64, maxlength)  # morts cumulés
-
-# Événements d'infection
-struct InfectionEvent
-    time::Int64
-    from::UUIDs.UUID
-    to::UUIDs.UUID
-    x::Int64
-    y::Int64
-end
-
-events = InfectionEvent[]
-
-run_simulation()
 
 # ## Analyse des résultats
 using Statistics
 
-n_runs = 20
+n_runs = 50
 
-deaths_with = [run_simulation(with_intervention=true) for _ in 1:n_runs]
-deaths_without = [run_simulation(with_intervention=false) for _ in 1:n_runs]
+results_with = [run_simulation(L, 3750, 21000; with_intervention=true) for _ in 1:n_runs]
+results_without = [run_simulation(L, 3750, 21000; with_intervention=false) for _ in 1:n_runs]
+
+# Une simulation pour visualisation (courbes temporelles)
+sim_with = run_simulation(L, 3750, 21000; with_intervention=true)
+sim_without = run_simulation(L, 3750, 21000; with_intervention=false)
+
+S_with, I_with, D_with = sim_with[4], sim_with[5], sim_with[6]
+S_without, I_without, D_without = sim_without[4], sim_without[5], sim_without[6]
+
+deaths_with = [r[1] for r in results_with]
+budget_with = [r[2] for r in results_with]
+
+deaths_without = [r[1] for r in results_without]
+budget_without = [r[2] for r in results_without]
+
+println("Budget moyen restant (avec intervention) = ", mean(budget_with))
 
 mean_with = mean(deaths_with)
 mean_without = mean(deaths_without)
@@ -321,6 +325,7 @@ println("Variance = ", var_without)
 
 println("\nGAIN (morts évités) = ", mean_without - mean_with)
 
+# Graphique comparatif
 f2 = Figure()
 
 ax = Axis(f2[1, 1];
@@ -329,93 +334,52 @@ ax = Axis(f2[1, 1];
     title="Comparaison des décès avec et sans intervention"
 )
 
-scatter!(ax, 1:n_runs, deaths_with, label="Avec intervention", color=:blue)
-scatter!(ax, 1:n_runs, deaths_without, label="Sans intervention", color=:red)
+scatter!(ax, 1:length(deaths_with), deaths_with, label="Avec intervention", color=:blue)
+scatter!(ax, 1:length(deaths_without), deaths_without, label="Sans intervention", color=:red)
 
 axislegend(ax)
-
 current_figure()
 
 println("Moyenne morts avec intervention = ", mean(deaths_with))
 println("Moyenne morts sans intervention = ", mean(deaths_without))
 
-# ### Série temporelle
+f3 = Figure()
 
-# Avant toute chose, nous allons couper les séries temporelles au moment de la
-# dernière génération:
+# Graphiqe avec intervention
+ax1 = Axis(f3[1, 1],
+    title = "Évolution AVEC intervention",
+    xlabel = "Temps",
+    ylabel = "Population"
+)
 
-S = S[1:tick];
-I = I[1:tick];
+lines!(ax1, 1:length(S_with), S_with, label="Sains")
+lines!(ax1, 1:length(I_with), I_with, label="Infectieux")
+lines!(ax1, 1:length(D_with), D_with, label="Décédés")
 
-# ## Analyse des résultats 
+axislegend(ax1)
 
-f = Figure()
-ax = Axis(f[1, 1]; xlabel="Génération", ylabel="Population")
-stairs!(ax, 1:tick, S, label="Sains", color=:black)
-stairs!(ax, 1:tick, I, label="Infectieux", color=:red)
-stairs!(ax, 1:tick, D, label="Morts", color=:gray)
-axislegend(ax)
+# Graphique sans intervention
+ax2 = Axis(f3[2, 1],
+    title = "Évolution SANS intervention",
+    xlabel = "Temps",
+    ylabel = "Population"
+)
+
+lines!(ax2, 1:length(S_without), S_without, label="Sains")
+lines!(ax2, 1:length(I_without), I_without, label="Infectieux")
+lines!(ax2, 1:length(D_without), D_without, label="Décédés")
+
+axislegend(ax2)
+
 current_figure()
 
-# Ajout: résultats finaux
-println("Nombre total de morts : ", deaths)
-println("Budget restant : ", budget)
+# ## Analyse events
+all_events = vcat([r[3] for r in results_with]...)
 
-# ### Nombre de cas par individu infectieux
-
-# Nous allons ensuite observer la distribution du nombre de cas créés par chaque
-# individus. Pour ceci, nous devons prendre le contenu de `events`, et vérifier
-# combien de fois chaque individu est représenté dans le champ `from`:
-
-infxn_by_uuid = countmap([event.from for event in events]);
-
-# La commande `countmap` renvoie un dictionnaire, qui associe chaque UUID au
-# nombre de fois ou il apparaît:
-
-# Notez que ceci nous indique combien d'individus ont été infectieux au total:
-
-length(infxn_by_uuid)
-
-# Pour savoir combien de fois chaque nombre d'infections apparaît, il faut
-# utiliser `countmap` une deuxième fois:
-
+infxn_by_uuid = countmap([e.from for e in all_events])
 nb_inxfn = countmap(values(infxn_by_uuid))
 
-# On peut maintenant visualiser ces données:
-
-f = Figure()
-ax = Axis(f[1, 1]; xlabel="Nombre d'infections", ylabel="Nombre d'agents")
-scatterlines!(ax, [get(nb_inxfn, i, 0) for i in Base.OneTo(maximum(keys(nb_inxfn)))], color=:black)
-f
-
-# ### Hotspots
-
-# Nous allons enfin nous intéresser à la propagation spatio-temporelle de
-# l'épidémie. Pour ceci, nous allons extraire l'information sur le temps et la
-# position de chaque infection:
-
-t = [event.time for event in events];
-pos = [(event.x, event.y) for event in events];
-
-#
-
-f = Figure()
-ax = Axis(f[1, 1]; aspect=1, backgroundcolor=:grey97)
-hm = scatter!(ax, pos, color=t, colormap=:navia, strokecolor=:black, strokewidth=1, colorrange=(0, tick), markersize=6)
-Colorbar(f[1, 2], hm, label="Time of infection")
-hidedecorations!(ax)
-current_figure()
-
-# # Figures supplémentaires
-
-# Visualisation des infections sur l'axe x
-
-scatter(t, first.(pos), color=:black, alpha=0.5)
-
-# et y
-
-scatter(t, last.(pos), color=:black, alpha=0.5)
-
+println("Nombre d'agents infectieux uniques : ", length(infxn_by_uuid))
 
 # ## Inclure du code
 
