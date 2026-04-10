@@ -340,6 +340,14 @@ scatter!(ax, 1:length(deaths_without), deaths_without, label="Sans intervention"
 axislegend(ax)
 current_figure()
 
+# **Figure 1: Comparaison des décès**
+# Cette figure présente, pour chacune des 50 simulations, le nombre total de décès observés 
+# avec et sans intervention. Chaque point correspond à une simulation indépendante. Cette 
+# figure permet de visualiser la variabilité des résultats entre les répétitions et de comparer 
+# directement l’effet global de l’intervention sur la mortalité. Elle met en évidence la dispersion 
+# des résultats ainsi que la tendance générale à une réduction du nombre de décès en présence 
+# d’une intervention.
+
 println("Moyenne morts avec intervention = ", mean(deaths_with))
 println("Moyenne morts sans intervention = ", mean(deaths_without))
 
@@ -373,6 +381,57 @@ axislegend(ax2)
 
 current_figure()
 
+# **Figure 2: Dynamique  temporelle de l’épidémie avec intervention**
+# Cette figure illustre l’évolution du nombre d’individus sains, infectieux et décédés au cours du 
+# temps pour une simulation représentative avec intervention. Elle permet de suivre la progression 
+# de l’épidémie génération par génération, d’identifier le pic d’infection et d’observer l’effet de 
+# l’intervention sur la diminution du nombre d’individus infectieux et la limitation des décès.
+
+# **Figure 3: Dynamique temporelle de l’épidémie sans intervention**
+# Cette figure présente l’évolution du nombre d’individus sains, infectieux et décédés au cours du 
+# temps pour une simulation sans intervention. Elle sert de référence pour comparer la dynamique 
+# naturelle de l’épidémie en absence de contrôle. Elle permet notamment d’observer une propagation 
+# plus rapide de la maladie, un pic d’infection plus élevé et une augmentation plus importante du 
+# nombre de décès.
+
+# Les Figures 2 et 3 permettent une comparaison directe de la dynamique temporelle de l’épidémie entre 
+# les deux scénarios, tandis que la Figure 1 synthétise l’effet global de l’intervention sur plusieurs 
+# simulations. Ensemble, ces figures permettent d’évaluer à la fois l’effet moyen de l’intervention et 
+# la variabilité des trajectoires épidémiques.
+
+# Les résultats du modèle sont obtenus à partir de 50 simulations indépendantes réalisées avec et sans 
+# intervention. Cette réplication permet de tenir compte de la variabilité inhérente au caractère stochastique 
+# du modèle.
+
+# En moyenne, le nombre de décès observé en présence d’une intervention est de 2425.32 individus, alors qu’il 
+# atteint 2739.9 individus en absence d’intervention. Cela correspond à une réduction moyenne d’environ 315 
+# décès lorsque le dépistage et la vaccination sont appliqués. Ainsi, l’intervention permet de diminuer la 
+# mortalité globale au sein de la population simulée.
+
+# La variabilité des résultats diffère également entre les deux scénarios. La variance du nombre de décès 
+# est de 389024.06 avec intervention, contre 669576.95 sans intervention. Les simulations avec intervention 
+# présentent donc une dispersion plus faible, indiquant des résultats plus homogènes d’une répétition à l’autre.
+
+# Le budget moyen restant à la fin des simulations avec intervention est de 1578.28, ce qui indique que la 
+# majorité des ressources disponibles est utilisée au cours de l’épidémie. En revanche, dans le scénario sans 
+# intervention, le budget demeure constant, puisqu’aucune dépense n’est effectuée.
+
+# Les dynamiques temporelles de l’épidémie sont illustrées par les courbes représentant l’évolution du nombre 
+# d’individus sains, infectieux et décédés. Sans intervention, le nombre d’individus infectieux augmente rapidement, 
+# entraînant une diminution rapide du nombre d’individus sains et une accumulation importante de décès. 
+# Avec intervention, l’augmentation du nombre d’infectieux est plus progressive, et la diminution des individus 
+# sains est ralentie, ce qui se traduit par un nombre total de décès plus faible.
+
+# L’analyse des événements d’infection révèle un total de 121 216 transmissions enregistrées au cours des simulations 
+# avec intervention. De plus, 73 344 agents infectieux uniques sont impliqués dans ces événements. La distribution 
+# du nombre d’infections causées par individu montre que la majorité des agents infectent un petit nombre d’individus, 
+# tandis qu’une minorité contribue à un nombre plus élevé de transmissions.
+
+# Dans l’ensemble, ces résultats mettent en évidence l’impact mesurable de l’intervention sur la réduction de la 
+# mortalité et sur la dynamique de propagation de la maladie, tout en illustrant la variabilité importante des 
+# trajectoires épidémiques entre simulations.
+
+
 # ## Analyse events
 all_events = vcat([r[3] for r in results_with]...)
 
@@ -394,24 +453,6 @@ println("Nombre d'agents infectieux uniques : ", length(infxn_by_uuid))
 
 include("code/01_test.jl")
 
-# ## Une autre section
-
-"""
-    foo(x, y)
-
-Cette fonction ne fait rien.
-"""
-function foo(x, y)
-    ## Cette ligne est un commentaire
-    return nothing
-end
-
-# # Présentation des résultats
-
-
-# La figure suivante représente des valeurs aléatoires:
-
-hist(randn(1000), color=:grey80)
 
 # # Discussion
 
