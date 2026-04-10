@@ -234,7 +234,7 @@ end
 
 # JUSTIFIER CE BLOQUE
 
-function run_simulation(L, n, budget_total; with_intervention=true)
+function run_simulation(L; with_intervention=true)
 
     population = Population(L, 3750)
     rand(population).infectious = true
@@ -341,16 +341,14 @@ end
 
 events = InfectionEvent[]
 
-run_simulation()
-
 # ## Analyse des résultats
 
 using Statistics
 
 n_runs = 20
 
-deaths_with = [run_simulation(with_intervention=true) for _ in 1:n_runs]
-deaths_without = [run_simulation(with_intervention=false) for _ in 1:n_runs]
+deaths_with = [run_simulation(L, with_intervention=true) for _ in 1:n_runs]
+deaths_without = [run_simulation(L, with_intervention=false) for _ in 1:n_runs]
 
 mean_with = mean(deaths_with)
 mean_without = mean(deaths_without)
