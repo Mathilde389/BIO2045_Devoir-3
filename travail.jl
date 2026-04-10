@@ -72,7 +72,7 @@ Base.@kwdef mutable struct Agent
     y::Int64 = 0 # position y
     clock::Int64 = 21 # durée de la maladie est de 21 jours
     infectious::Bool = false # état infectieux
-      # Vaccination
+    ## Vaccination
     vaccinated::Bool = false        # vacciné ou non
     vaccine_delay::Int64 = 0        # délai avant efficacité
 
@@ -207,19 +207,19 @@ function run_simulation(L, n, budget_total; with_intervention=true)
 
         tick += 1
 
-        # Déplacement
+        ## Déplacement
         for agent in population
             move!(agent, L; torus=false)
         end
 
-        # Mise à jour délai vaccin
+        ## Mise à jour délai vaccin
         for agent in population
             if agent.vaccine_delay > 0
                 agent.vaccine_delay -= 1
             end
         end
 
-        # Infection
+        ## Infection
         for agent in Random.shuffle(infectious(population))
             neighbors = healthy(incell(agent, population))
             for neighbor in neighbors
@@ -229,17 +229,17 @@ function run_simulation(L, n, budget_total; with_intervention=true)
             end
         end
 
-        # Progression maladie
+        ## Progression maladie
         for agent in infectious(population)
             agent.clock -= 1
         end
 
-        # Décès
+        ## Décès
         before = length(population)
         population = filter(x -> x.clock > 0, population)
         after = length(population)
 
-        # Déclenche intervention
+        ## Déclenche intervention
         if !first_death && after < before
             intervention_started = true
             first_death = true
@@ -247,7 +247,7 @@ function run_simulation(L, n, budget_total; with_intervention=true)
 
         deaths += (before - after)
 
-        # Intervention (activable)
+        ## Intervention (activable)
         if with_intervention && intervention_started && budget > 0
             for agent in population
                 if budget >= cost_test
@@ -273,7 +273,9 @@ function run_simulation(L, n, budget_total; with_intervention=true)
 
     return deaths
 end
+
 # ## Simulation
+
 tick = 0
 maxlength = 2000
 
@@ -358,6 +360,7 @@ axislegend(ax)
 current_figure()
 
 # Ajout: résultats finaux
+
 println("Nombre total de morts : ", deaths)
 println("Budget restant : ", budget)
 
