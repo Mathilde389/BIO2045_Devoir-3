@@ -393,6 +393,7 @@ println("Moyenne morts sans intervention = ", mean(deaths_without))
 
 S = S[1:tick];
 I = I[1:tick];
+D = D[1:tick];
 
 # ## Analyse des résultats 
 
