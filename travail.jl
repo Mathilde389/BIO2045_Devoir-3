@@ -88,7 +88,6 @@ Base.@kwdef mutable struct Landscape
 end
 
 # Création du paysage
-
 L = Landscape(xmin=-50, xmax=50, ymin=-50, ymax=50)
 
 # ## Génération d'agents aléatoires
