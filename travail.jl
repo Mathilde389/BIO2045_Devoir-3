@@ -42,6 +42,39 @@
 # individus. 
 
 # # Présentation du modèle
+# Nous utilisons un modèle de simulation individu-centré pour représenter la propagation d’une maladie infectieuse dans une population. 
+# Les modèles individu-centrés permettent de représenter explicitement les interactions entre individus et d’évaluer l’effet de différentes 
+# stratégies de contrôle, notamment le dépistage et la vaccination (Adam & Arduin, 2023). Chaque individu est représenté par un agent 
+# évoluant dans un espace discret bidimensionnel (lattice) défini par des coordonnées allant de -50 à 50 sur les axes x et y. La population 
+# initiale est composée de 3750 agents distribués aléatoirement dans cet espace.
+
+# Chaque agent possède plusieurs caractéristiques : une position spatiale, un état sanitaire (infectieux ou sain), un compteur de durée 
+# d’infection (fixé à 21 jours), ainsi qu’un identifiant unique. Lorsqu’un agent devient infectieux, il le reste pendant toute la durée 
+# de la maladie, qui est toujours fatale dans ce modèle. La population est initialement entièrement naïve, c’est-à-dire qu’aucun individu 
+# ne possède d’immunité au départ.
+
+# À chaque pas de temps (génération), les agents se déplacent aléatoirement dans la grille. La transmission de la maladie se produit lorsqu’un 
+# agent infectieux partage la même cellule qu’un agent sain. Dans ce cas, la probabilité de transmission est fixée à 0,4. Les agents infectieux 
+# voient leur durée d’infection diminuer à chaque génération, et sont retirés de la population lorsque cette durée atteint zéro, ce qui correspond 
+# à leur décès.
+
+# Afin de simuler une intervention sanitaire, un mécanisme combinant dépistage et vaccination a été intégré au modèle. L’intervention est
+# déclenchée uniquement après la détection du premier décès dans la population. Une stratégie de dépistage actif est alors mise en place à l’aide 
+# de tests antigéniques rapides (RAT), qui permettent d’identifier les individus infectieux avec une probabilité élevée (Lasser et al., 2021 ; Tran et al., 2023). 
+# Lorsqu’un cas est détecté, une intervention ciblée est appliquée à ses contacts, ce qui reflète les approches modernes de contrôle en épidémiologie 
+# (Lasser et al., 2021).
+# Dans ce modèle, les tests RAT présentent une probabilité de détection de 95 %, pour un coût unitaire de 4 $, avec un budget total d’intervention 
+# fixé à 21 000 $. Ils offrent donc un moyen rapide d’identifier les individus infectieux, bien que leur sensibilité imparfaite puisse en limiter 
+# l’efficacité dans le contrôle global de l’épidémie (Lasser et al., 2021).
+
+# Lorsqu’un individu est testé positif, les agents présents dans la même cellule spatiale (considérés comme ses contacts proches) peuvent être vaccinés, 
+# à condition que le budget le permette. Le coût d’une vaccination est de 17$ par individu. Le vaccin est entièrement efficace, mais son effet n’est actif 
+# qu’après un délai de deux générations. Une fois le vaccin actif, l’agent ne peut plus être infecté ni transmettre la maladie.
+
+#La simulation se poursuit jusqu’à l’extinction de la maladie (absence d’individus infectieux) ou jusqu’à un maximum de 2000 générations. Les principales 
+# variables suivies sont le nombre d’individus sains et infectieux au cours du temps, ainsi que le nombre total de décès, permettant d’évaluer l’efficacité 
+# de la stratégie de vaccination en comparaison avec un scénario sans intervention.
+
 
 # Nous utilisons un modèle de simulation individu-centré pour représenter la
 # propagation d’une maladie infectieuse dans une population. Les modèles
@@ -143,7 +176,6 @@ L = Landscape(xmin=-50, xmax=50, ymin=-50, ymax=50)
 # ## Génération d'agents aléatoires
 
 # Crée un agent à une position aléatoire
-
 Random.rand(::Type{Agent}, L::Landscape) = Agent(x=rand(L.xmin:L.xmax), y=rand(L.ymin:L.ymax))
 
 # Crée plusieurs agents
@@ -180,7 +212,6 @@ end
 # ## Fonctions utiles
 
 # Déterminer si l'agent est infectueux 
-
 isinfectious(agent::Agent) = agent.infectious
 
 # Déterminer si l'agent est sain
@@ -216,6 +247,7 @@ population = make_population(L, 3750)
 
 # Cas index (premier infecté)
 
+# Cas index (premier infecté)
 rand(population).infectious = true
 
 # ## Paramètres intervention
@@ -237,7 +269,6 @@ function vaccinate!(agent::Agent)
     end
 end
 
-<<<<<<< HEAD
 # ## Simulation principale
 Base.@kwdef struct InfectionEvent
     tick::Int
@@ -348,6 +379,7 @@ function run_simulation(L::Landscape, n::Int, budget_total; with_intervention=tr
 end
 
 # ## Analyse des résultats
+using Statistics
 
 using Statistics
 
