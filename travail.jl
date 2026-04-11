@@ -78,17 +78,12 @@
 # # Implémentation
 
 # ## Packages nécessaires
-using CairoMakie
-using StatsBase
-import Random
-# METTRE AU BON ENDROIT (PROJECT.TOML)
 
 # Initialisation
 Random.seed!(123456)
 CairoMakie.activate!(px_per_unit=6.0)
 
 # Identifiants uniques pour chaque agent
-import UUIDs
 UUIDs.uuid4()
 
 # ## Création des types
