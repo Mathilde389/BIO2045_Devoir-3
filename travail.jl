@@ -1,5 +1,5 @@
 # ---
-# title: Titre du travail
+# title: Simulation individu-centrée de la propagation d’une maladie infectieuse et évaluation d’une stratégie de dépistage et vaccination
 # repository: tpoisot/BIO245-modele
 # auteurs:
 #    - nom: Hammel-Monzon
@@ -12,6 +12,33 @@
 #      github: Mathilde389
 
 # # Introduction
+# Lors de propagation rapide de maladies infectieuses, comme les épidémies, il est essentiel
+# de comprendre comment différentes stratégies d’intervention permettent de limiter la transmission 
+# et la mortalité. En effet, cela représente un enjeu majeur en santé publique, surtout lorsque 
+# les individus infectés peuvent transmettre la maladie sans présenter de symptômes. 
+# Par exemple, dans le cas de la covid, le contrôle de la propagation de la maladie a été 
+# compliqué du aux individus porteurs asymptomatiques (Zhang et al, 2021).
+
+# Afin de contrôler les épidémies, il est important de mettre en place des outils comme
+# le dépistage et la vaccination. Les tests de dépistages, comme les tests antigéniques
+# rapides, permettent d’identifier rapidement les individus infectieux (Mina et al, 2020). 
+# Les individus infectieux peuvent alors prendre des mesures de sécurités afin de pas 
+# infecter le reste de la population. Les vaccins sont des mesures de prévention qui
+# permettent de donner de l’immunité protectrice comme celui pour l’hépatite B (Schillie et al, 2018).
+# Cela empêche le développement de la maladie lors d’un contact par la suite. 
+
+# Cependant l’efficacité de ces stratégies dépend de plusieurs contraintes biologiques et
+# logistiques. Les tests de dépistage ne sont pas totalement fiable et peuvent donner 
+# des faux positives ou des faux négatifs. Les faux négatifs sont ceux qui mettent 
+# à risque le reste de la population puisqu’un individu infecté est identifié comme 
+# sain et peux donc infecter d’autres personnes. De plus les vaccins n’offrent pas 
+#toujours une protection immédiate, et il y a donc une période pendant laquelle les
+# individus vaccinés sont vulnérable. Le budget attribué aux stratégies de vaccination
+# est également une limite.
+
+# L’objectif de ce travail est donc de tester une stratégie de contrôle d’une maladie
+# infectieuse dans une population en agissant sur le dépistage et la vaccination des 
+# individus. 
 
 # # Présentation du modèle
 # Nous utilisons un modèle de simulation individu-centré pour représenter la propagation d’une maladie infectieuse dans une population. 
@@ -454,7 +481,56 @@ println("Nombre d'agents infectieux uniques : ", length(infxn_by_uuid))
 include("code/01_test.jl")
 
 
-# # Discussion
+# ## Discussion
+# Les résultats obtenus montrent que l’intervention basée sur le dépistage et la vaccination ciblée permet 
+# de réduire le nombre total de décès par rapport au scénario sans intervention. En moyenne, environ 314 
+# décès sont évités, ce qui indique que la stratégie mise en place est efficace pour limiter la propagation 
+# de la maladie. Cette réduction s’explique par le fait que le dépistage permet d’identifier rapidement 
+# une partie des individus infectieux et d’interrompre les chaînes de transmission, tandis que la vaccination 
+# des contacts proches diminue la probabilité de transmission locale (Adam & Arduin, 2023).
+
+# La stratégie de vaccination implémentée correspond à une approche de vaccination en anneau, dans laquelle 
+# les individus en contact avec un cas détecté sont vaccinés de manière ciblée (Henao-Restrepo et al., 2017). 
+# Cette stratégie vise à créer une barrière immunitaire autour des foyers d’infection afin de limiter leur 
+# expansion (Krauland et al., 2026). Dans le modèle, cette approche permet de contenir localement la propagation, 
+# mais son efficacité dépend fortement de la rapidité du dépistage et de la capacité à intervenir avant que 
+# l’infection ne se diffuse à d’autres cellules.
+
+# Cependant, l’intervention ne permet pas d’éliminer complètement l’épidémie. Plusieurs facteurs expliquent 
+# cette efficacité partielle. D’une part, les tests antigéniques ne sont pas parfaitement sensibles, 
+# ce qui signifie qu’une fraction des individus infectieux n’est pas détectée et continue de transmettre 
+# la maladie (Adam & Arduin, 2023 ; Krauland et al., 2026). D’autre part, le vaccin n’est pas immédiatement 
+# efficace; le délai de deux générations avant l’acquisition de l’immunité laisse une période durant 
+# laquelle les individus vaccinés restent susceptibles. Enfin, la limitation du budget restreint le nombre 
+# total de tests et de vaccinations pouvant être réalisés, ce qui empêche une couverture complète de la population.
+
+# L’analyse du budget apporte un éclairage important sur l’efficacité de l’intervention. En moyenne, 
+# une partie du budget reste inutilisée à la fin des simulations, ce qui suggère que l’épidémie peut 
+# parfois s’éteindre avant que toutes les ressources ne soient déployées. Cela indique que le facteur 
+# limitant n’est pas uniquement la quantité de ressources disponibles, mais également le moment du 
+# déclenchement de l’intervention et la dynamique de propagation de la maladie. Toutefois, dans 
+# certaines simulations, une consommation plus rapide du budget limite la capacité à tester et 
+# vacciner de nouveaux individus au cours de l’épidémie. Cela met en évidence l’importance d’une 
+# allocation efficace et précoce des ressources pour maximiser l’impact des interventions.
+
+# Les résultats montrent également une forte variabilité entre les simulations, tant avec que 
+# sans intervention. Cette variabilité est liée au caractère stochastique du modèle, notamment 
+# dans les déplacements des agents et les événements de transmission (Adam & Arduin, 2023 ; 
+# Shakiba et al., 2021). Dans certains cas, l’épidémie s’éteint rapidement après peu de 
+# transmissions, tandis que dans d’autres, elle se propage largement dans la population. 
+# Cette variabilité reflète l’importance du hasard dans les dynamiques épidémiques, en 
+# particulier au début de l’épidémie (Shakiba et al., 2021 ; Karen et al., 2022).
+
+# D’un point de vue épidémiologique, ces résultats sont cohérents avec les observations réelles. 
+# Ils soulignent l’importance des stratégies combinant dépistage et vaccination ciblée pour contrôler 
+# une épidémie (Adam & Arduin, 2023). Le modèle met également en évidence le rôle crucial du délai 
+# d’action des interventions; une réponse tardive ou une immunité retardée peut limiter l’efficacité 
+# globale des mesures (Krauland et al., 2026). Par ailleurs, la distribution du nombre d’infections 
+# secondaires suggère une propagation hétérogène, où certains individus infectent plusieurs autres,
+# tandis que la majorité en infecte peu. Ce phénomène est caractéristique des dynamiques de type 
+# « super-propagation », soit des situations où un petit nombre d’individus infectés est responsable 
+# d’un nombre disproportionné de transmissions, contribuant fortement à la diffusion globale de la 
+# maladie (Karen et al., 2022 ; Shakiba et al., 2021).
 
 # On peut aussi citer des références dans le document `references.bib`, qui doit
 # être au format BibTeX. Les références peuvent être citées dans le texte avec
