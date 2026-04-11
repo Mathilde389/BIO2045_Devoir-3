@@ -1,5 +1,5 @@
 # ---
-# title: title: Simulation individu-centrée de la propagation d’une maladie infectieuse et évaluation d’une stratégie de dépistage et vaccination
+# title: Simulation individu-centrée de la propagation d’une maladie infectieuse et évaluation d’une stratégie de dépistage et vaccination
 # repository: tpoisot/BIO245-modele
 # auteurs:
 #    - nom: Hammel-Monzon
@@ -12,6 +12,33 @@
 #      github: Mathilde389
 
 # # Introduction
+# Lors de propagation rapide de maladies infectieuses, comme les épidémies, il est essentiel
+# de comprendre comment différentes stratégies d’intervention permettent de limiter la transmission 
+# et la mortalité. En effet, cela représente un enjeu majeur en santé publique, surtout lorsque 
+# les individus infectés peuvent transmettre la maladie sans présenter de symptômes. 
+# Par exemple, dans le cas de la covid, le contrôle de la propagation de la maladie a été 
+# compliqué du aux individus porteurs asymptomatiques (Zhang et al, 2021).
+
+# Afin de contrôler les épidémies, il est important de mettre en place des outils comme
+# le dépistage et la vaccination. Les tests de dépistages, comme les tests antigéniques
+# rapides, permettent d’identifier rapidement les individus infectieux (Mina et al, 2020). 
+# Les individus infectieux peuvent alors prendre des mesures de sécurités afin de pas 
+# infecter le reste de la population. Les vaccins sont des mesures de prévention qui
+# permettent de donner de l’immunité protectrice comme celui pour l’hépatite B (Schillie et al, 2018).
+# Cela empêche le développement de la maladie lors d’un contact par la suite. 
+
+# Cependant l’efficacité de ces stratégies dépend de plusieurs contraintes biologiques et
+# logistiques. Les tests de dépistage ne sont pas totalement fiable et peuvent donner 
+# des faux positives ou des faux négatifs. Les faux négatifs sont ceux qui mettent 
+# à risque le reste de la population puisqu’un individu infecté est identifié comme 
+# sain et peux donc infecter d’autres personnes. De plus les vaccins n’offrent pas 
+#toujours une protection immédiate, et il y a donc une période pendant laquelle les
+# individus vaccinés sont vulnérable. Le budget attribué aux stratégies de vaccination
+# est également une limite.
+
+# L’objectif de ce travail est donc de tester une stratégie de contrôle d’une maladie
+# infectieuse dans une population en agissant sur le dépistage et la vaccination des 
+# individus. 
 
 # # Présentation du modèle
 # Nous utilisons un modèle de simulation individu-centré pour représenter la propagation d’une maladie infectieuse dans une population. 
@@ -51,17 +78,12 @@
 # # Implémentation
 
 # ## Packages nécessaires
-using CairoMakie
-using StatsBase
-import Random
-# METTRE AU BON ENDROIT (PROJECT.TOML)
 
 # Initialisation
 Random.seed!(123456)
 CairoMakie.activate!(px_per_unit=6.0)
 
 # Identifiants uniques pour chaque agent
-import UUIDs
 UUIDs.uuid4()
 
 # ## Création des types
@@ -88,6 +110,7 @@ Base.@kwdef mutable struct Landscape
 end
 
 # Création du paysage
+
 L = Landscape(xmin=-50, xmax=50, ymin=-50, ymax=50)
 
 # ## Génération d'agents aléatoires
@@ -453,7 +476,7 @@ println("Nombre d'agents infectieux uniques : ", length(infxn_by_uuid))
 include("code/01_test.jl")
 
 
-# # Discussion
+# ## Discussion
 # Les résultats obtenus montrent que l’intervention basée sur le dépistage et la vaccination ciblée permet 
 # de réduire le nombre total de décès par rapport au scénario sans intervention. En moyenne, environ 314 
 # décès sont évités, ce qui indique que la stratégie mise en place est efficace pour limiter la propagation 
@@ -503,7 +526,6 @@ include("code/01_test.jl")
 # « super-propagation », soit des situations où un petit nombre d’individus infectés est responsable 
 # d’un nombre disproportionné de transmissions, contribuant fortement à la diffusion globale de la 
 # maladie (Karen et al., 2022 ; Shakiba et al., 2021).
-
 
 # On peut aussi citer des références dans le document `references.bib`, qui doit
 # être au format BibTeX. Les références peuvent être citées dans le texte avec
