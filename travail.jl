@@ -375,6 +375,64 @@ end
 hist(randn(1000), color=:grey80)
 
 # # Discussion
+#
+# Malgré les résultats obtenus, ce modèle présente plusieurs limites qui devraient 
+# être prises en compte lors de l’interprétation des résultats. Tout d’abord, la 
+# dynamique de transmission de la maladie utilisé dans cette simulation est très 
+# simplifié. Par exemple, la probabilité d’infection est fixé à 0,4 pour tous les
+#  individus et toutes les interactions. Cependant, dans les situations réelles la 
+# transmission d’une maladie dépend de plusieurs facteurs, comme la charge virale, 
+# la durée de contact et les caractéristiques individuelles (âge, état de santé etc)
+#  (SOURCE 1). De plus, ces facteurs là dépendent également de la maladie transmisse.
+#  Par exemple ---- (SOURCE 2). Puisque le modèle présente la transmission de façon 
+# simpliste, cela limite le modèle à refléter fidèlement la complexité de la 
+# transmission de façon réelle. 
+#
+#Une autre limite du modèle est que les agents se déplace de manière aléatoire dans
+# un environnement homogène. Cette modélisation ne prend pas en compte les interactions 
+# sociales des individus. En effet, dans des situations réelles, les individus ont
+# tendance à interagir avec certains groupes plus que d’autres. Par exemple, les enfants
+# vont à l’école, les adultes au travail, les individus ont des familles etc (SOURCE 3).
+# Cela influence donc la transmission des maladies. Sans modélisation des interactions
+# réelles entre les individus, la vitesse de propagation de la maladie peut être
+# sous-estimée. Afin d’améliorer la simulation, il serait intéressant d’intégrer
+# des réseaux sociaux en créant des zones de fortes densités. 
+
+# De plus, dans ce modèle, la maladie est toujours fatale, ce qui est également une 
+# simplification de la réalité. La plupart des maladies infectieuses ont des taux 
+# de mortalité variable, avec un certain pourcentage d’individus qui guérissent et
+# développent une immunité naturelle (SOURCE 4). Puisqu’il n’y a pas d’individus
+# « rétablis », les dynamiques de rétablissement réelles ne sont pas représentés. 
+# L’ajout de cet état permettrait de mieux représenter l’effet de la maladie sur la
+# population. 
+#
+#En ce qui concerne les types d’intervention, des simplifications ont été faites pour
+# la modélisation de la simulation. En effet, les tests de dépistages sont administrés
+# de manière aléatoire et sans priorisation. Dans des scénarios réels, certains groupes
+# de populations sont plus à risque que d’autres, par exemple les personnes âgées ou
+# les personnes immuno-déficientes (SOURCE 5). Par exemple, lors du covid (SOURCE 6).
+# De plus, dans ce scénario, le vaccin est parfaitement efficace après deux générations
+# pour tous les individus. Cependant, l’efficacité vaccinale peut être partielle et
+# n’est pas efficace après le même temps d’incubation pour tout le monde (SOURCE 7).
+# De plus, ce scénario ne prend pas en compte que le virus peut muter et qu’il est
+# donc nécessaire de faire plusieurs doses de vaccins (SOURCE 8), comme lors de
+# la covid. Afin d’améliorer le modèle, il serait intéressant d’introduire des 
+#stratégies de dépistage et une probabilité de l’efficacité vaccinale.
+#
+# Par ailleurs, le déclanchement de l’intervention débute seulement après le premier
+# décès. La réponse sanitaire est donc déclenchées assez tardivement. En effet, elle
+# aurait pu être déclenchée dès le premier cas détecté. Par exemple, (SOURCE 9).
+# Il serait intéressant de faire plusieurs simulations avec différents temps de
+# déclanchement de l’intervention afin de sélectionner celle qui induit le moins
+# de décès.
+
+# Finalement, le modèle est stochastique, ce qui est important pour représenter
+# l’incertitude. Cependant, cela introduit une forte variabilité des résultats.
+# Cette variabilité est prise en compte par la répétition des simulations mais
+# une analyse plus approfondie permettrait de déterminer quels paramètres influencent
+# le plus les résultats.
+
+
 
 # On peut aussi citer des références dans le document `references.bib`, qui doit
 # être au format BibTeX. Les références peuvent être citées dans le texte avec
