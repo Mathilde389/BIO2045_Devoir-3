@@ -45,6 +45,58 @@
 # infectieuse dans une population en agissant sur le dépistage et la vaccination des 
 # individus. 
 
+# # Présentation de la stratégie d'intervention
+
+# Dans le contrôle de maladies infectieuses, plusieurs stratégies peuvent être mise
+# en place, notamment en ce qui concerne la vaccination et le dépistage.
+
+# Pour la vaccination, il existe différentes stratégies, comme la vaccination de masse,
+# la vaccination ciblée des groupes à risques ainsi que la vaccination en anneau.
+
+# La vaccination de masse consiste à immuniser une grande partie de la population afin
+# de réduire la transmission de la maladie (Bullen et al, 2023). Cette stratégie est
+# très efficace, cependant, elle nécessite beaucoup de ressources comme une disponibilité
+# suffisante de vaccins (Wouters et al, 2021). Cela rend son application compliquée
+# surtout en début d’épidémie.  Cette stratégie a été utilisé lors de la COVID-19, et un
+# des défis était l’accès aux ressources comme les vaccins et le budget (Wouters et al, 2021).
+
+# La vaccination ciblée des groupes a risques, comme les personnes immunodéprimées ou
+# les personnes âgées, permet de réduire la mortalité (Self et al, 2021). Cependant
+# elle ne permet pas de casser la chaine de transmission dans la population. Cette stratégie
+# a été également été utilisée lors de la COVID-19 (Self et al, 2021). En effet, au début de
+# l’épidémie, les personnes à risques été vacciner en priorité.
+
+# La vaccination en anneau consiste à vacciner les contacts proches des individus infectés
+# (Henao-Restrepo et al, 2016). Cela permet de créer une barrière immunitaire. Cette stratégie
+# permet de limiter localement la propagation de la maladie. Cette stratégie à été utilisé lors
+# des épidémies d’Ébola et a été efficace pour contrôler la transmission de la maladie
+# (Henao-Restrepo et al, 2016)
+
+# Pour le dépistage, il existe également différentes stratégies, comme le dépistage massif
+# et le dépistage ciblé.
+
+# Le dépistage massif consiste à tester une grande partie de la population, ce qui permet de
+# détecter un grand nombre de cas (Shen et al, 2021). Cependant, cette stratégie nécessite
+# beaucoup de ressource et peut donc être difficile à garder en place sur le long terme
+# (Shen et al, 2021). 
+
+# Le dépistage ciblé consiste à tester en priorité certains individus, par exemple les contacts
+# de cas confirmés (Kretzschmar et al, 2020). Cette stratégie utilise plus efficacement les
+# ressources sur le long terme.
+
+# Dans le modèle, une stratégie combinant un dépistage relativement massif ainsi qu’une
+# vaccination en anneau à été choisie. En effet, le dépistage relativement massif permet
+# d’identifier rapidement les individus infectieux. Une fois les cas détectés, la vaccination 
+#des contacts permet de limiter la propagation locale, ce qui créer une barrière immunitaire.
+# Cette stratégie a été choisie puisqu’elle permet de mieux utiliser les ressources. En effet,
+# les tests de dépistages coutent moins cher, et la vaccination en anneau permet de vacciner
+# moins de personnes. Cela permet donc une optimisation des ressources. La combinaison du
+# dépistage et de la vaccination en anneau constitue donc une stratégie efficace et réaliste
+# pour limiter la propagation d’une maladie infectieuse.
+
+
+
+
 
 # # Présentation du modèle
 
