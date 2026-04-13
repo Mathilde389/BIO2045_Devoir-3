@@ -84,10 +84,10 @@
 
 # Lorsqu’un individu est testé positif, les agents présents dans la même cellule
 # spatiale (considérés comme ses contacts proches) peuvent être vaccinés, à
-# condition que le budget le permette. Le coût d’une vaccination est de 17$ par
-# individu. Le vaccin est entièrement efficace, mais son effet n’est actif
-# qu’après un délai de deux générations. Une fois le vaccin actif, l’agent ne
-# peut plus être infecté ni transmettre la maladie.
+# condition que le budget le permette. Cela est considéré comme une vaccination en anneau. 
+# Le coût d’une vaccination est de 17$ par individu. Le vaccin est entièrement efficace, 
+# mais son effet n’est actif qu’après un délai de deux générations. Une fois le 
+# vaccin actif, l’agent ne peut plus être infecté ni transmettre la maladie.
 
 #La simulation se poursuit jusqu’à l’extinction de la maladie (absence
 # d’individus infectieux) ou jusqu’à un maximum de 2000 générations. Les
@@ -518,7 +518,7 @@ include("code/01_test.jl")
 
 
 # ## Discussion
-# Les résultats obtenus montrent que l’intervention basée sur le dépistage et la vaccination ciblée permet 
+# Les résultats obtenus montrent que l’intervention basée sur le dépistage et la vaccination en anneau permet 
 # de réduire le nombre total de décès par rapport au scénario sans intervention. En moyenne, environ 314 
 # décès sont évités, ce qui indique que la stratégie mise en place est efficace pour limiter la propagation 
 # de la maladie. Cette réduction s’explique par le fait que le dépistage permet d’identifier rapidement 
@@ -558,7 +558,7 @@ include("code/01_test.jl")
 # particulier au début de l’épidémie (Shakiba et al., 2021 ; Karen et al., 2022).
 
 # D’un point de vue épidémiologique, ces résultats sont cohérents avec les observations réelles. 
-# Ils soulignent l’importance des stratégies combinant dépistage et vaccination ciblée pour contrôler 
+# Ils soulignent l’importance des stratégies combinant dépistage et vaccination en anneau pour contrôler 
 # une épidémie (Adam & Arduin, 2023). Le modèle met également en évidence le rôle crucial du délai 
 # d’action des interventions; une réponse tardive ou une immunité retardée peut limiter l’efficacité 
 # globale des mesures (Krauland et al., 2026). Par ailleurs, la distribution du nombre d’infections 
