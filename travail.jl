@@ -41,7 +41,8 @@
 # infectieuse dans une population en agissant sur le dépistage et la vaccination des 
 # individus. 
 
-# ## Présentation du modèle
+# # Présentation du modèle
+
 # Nous utilisons un modèle de simulation individu-centré pour représenter la
 # propagation d’une maladie infectieuse dans une population. Les modèles
 # individu-centrés permettent de représenter explicitement les interactions
@@ -84,10 +85,10 @@
 
 # Lorsqu’un individu est testé positif, les agents présents dans la même cellule
 # spatiale (considérés comme ses contacts proches) peuvent être vaccinés, à
-# condition que le budget le permette. Cela est considéré comme une vaccination en anneau. 
-# Le coût d’une vaccination est de 17$ par individu. Le vaccin est entièrement efficace, 
-# mais son effet n’est actif qu’après un délai de deux générations. Une fois le 
-# vaccin actif, l’agent ne peut plus être infecté ni transmettre la maladie.
+# condition que le budget le permette. Le coût d’une vaccination est de 17$ par
+# individu. Le vaccin est entièrement efficace, mais son effet n’est actif
+# qu’après un délai de deux générations. Une fois le vaccin actif, l’agent ne
+# peut plus être infecté ni transmettre la maladie.
 
 #La simulation se poursuit jusqu’à l’extinction de la maladie (absence
 # d’individus infectieux) ou jusqu’à un maximum de 2000 générations. Les
@@ -102,6 +103,10 @@
 # ## Packages nécessaires
 
 # Initialisation
+
+using Random
+using CairoMakie
+using UUIDs
 
 Random.seed!(123456)
 CairoMakie.activate!(px_per_unit=6.0)
@@ -142,6 +147,7 @@ L = Landscape(xmin=-50, xmax=50, ymin=-50, ymax=50)
 # ## Génération d'agents aléatoires
 
 # Crée un agent à une position aléatoire
+
 Random.rand(::Type{Agent}, L::Landscape) = Agent(x=rand(L.xmin:L.xmax), y=rand(L.ymin:L.ymax))
 
 # Crée plusieurs agents
@@ -178,6 +184,7 @@ end
 # ## Fonctions utiles
 
 # Déterminer si l'agent est infectueux 
+
 isinfectious(agent::Agent) = agent.infectious
 
 # Déterminer si l'agent est sain
@@ -213,7 +220,6 @@ population = make_population(L, 3750)
 
 # Cas index (premier infecté)
 
-# Cas index (premier infecté)
 rand(population).infectious = true
 
 # ## Paramètres intervention
@@ -345,7 +351,6 @@ function run_simulation(L::Landscape, n::Int, budget_total; with_intervention=tr
 end
 
 # ## Analyse des résultats
-using Statistics
 
 using Statistics
 
@@ -388,9 +393,9 @@ println("Variance = ", var_without)
 println("\nGAIN (morts évités) = ", mean_without - mean_with)
 
 # Graphique comparatif
-f2 = Figure()
+f1 = Figure();
 
-ax = Axis(f2[1, 1];
+ax = Axis(f1[1, 1];
     xlabel="Simulation",
     ylabel="Nombre de morts",
     title="Comparaison des décès avec et sans intervention"
@@ -400,7 +405,7 @@ scatter!(ax, 1:length(deaths_with), deaths_with, label="Avec intervention", colo
 scatter!(ax, 1:length(deaths_without), deaths_without, label="Sans intervention", color=:red)
 
 axislegend(ax)
-current_figure()
+f1
 
 # **Figure 1: Comparaison des décès**
 # Cette figure présente, pour chacune des 50 simulations, le nombre total de décès observés 
@@ -413,10 +418,10 @@ current_figure()
 println("Moyenne morts avec intervention = ", mean(deaths_with))
 println("Moyenne morts sans intervention = ", mean(deaths_without))
 
-f3 = Figure()
+f2 = Figure();
 
 # Graphiqe avec intervention
-ax1 = Axis(f3[1, 1],
+ax1 = Axis(f2[1, 1],
     title = "Évolution AVEC intervention",
     xlabel = "Temps",
     ylabel = "Population"
@@ -430,7 +435,7 @@ lines!(ax1, 1:length(D_with), D_with, label="Décédés")
 axislegend(ax1)
 
 # Graphique sans intervention
-ax2 = Axis(f3[2, 1],
+ax2 = Axis(f2[2, 1],
     title = "Évolution SANS intervention",
     xlabel = "Temps",
     ylabel = "Population"
@@ -442,7 +447,7 @@ lines!(ax2, 1:length(D_without), D_without, label="Décédés")
 
 axislegend(ax2)
 
-current_figure()
+f2
 
 # **Figure 2: Dynamique  temporelle de l’épidémie avec intervention**
 # Cette figure illustre l’évolution du nombre d’individus sains, infectieux et décédés au cours du 
@@ -494,31 +499,8 @@ current_figure()
 # mortalité et sur la dynamique de propagation de la maladie, tout en illustrant la variabilité importante des 
 # trajectoires épidémiques entre simulations.
 
-
-# ## Analyse events
-all_events = vcat([r[3] for r in results_with]...)
-
-infxn_by_uuid = countmap([e.from for e in all_events])
-nb_inxfn = countmap(values(infxn_by_uuid))
-
-println("Nombre d'agents infectieux uniques : ", length(infxn_by_uuid))
-
-# ## Inclure du code
-
-# Tous les fichiers dans le dossier `code` peuvent être ajoutés au travail
-# final. C'est par exemple utile pour déclarer l'ensemble des fonctions du
-# modèle hors du document principal.
-
-# Le contenu des fichiers est inclus avec `include("code/nom_fichier.jl")`.
-
-# Attention! Il faut que le code soit inclus au bon endroit (avant que les
-# fonctions déclarées soient appellées).
-
-include("code/01_test.jl")
-
-
 # ## Discussion
-# Les résultats obtenus montrent que l’intervention basée sur le dépistage et la vaccination en anneau permet 
+# Les résultats obtenus montrent que l’intervention basée sur le dépistage et la vaccination ciblée permet 
 # de réduire le nombre total de décès par rapport au scénario sans intervention. En moyenne, environ 314 
 # décès sont évités, ce qui indique que la stratégie mise en place est efficace pour limiter la propagation 
 # de la maladie. Cette réduction s’explique par le fait que le dépistage permet d’identifier rapidement 
@@ -558,7 +540,7 @@ include("code/01_test.jl")
 # particulier au début de l’épidémie (Shakiba et al., 2021 ; Karen et al., 2022).
 
 # D’un point de vue épidémiologique, ces résultats sont cohérents avec les observations réelles. 
-# Ils soulignent l’importance des stratégies combinant dépistage et vaccination en anneau pour contrôler 
+# Ils soulignent l’importance des stratégies combinant dépistage et vaccination ciblée pour contrôler 
 # une épidémie (Adam & Arduin, 2023). Le modèle met également en évidence le rôle crucial du délai 
 # d’action des interventions; une réponse tardive ou une immunité retardée peut limiter l’efficacité 
 # globale des mesures (Krauland et al., 2026). Par ailleurs, la distribution du nombre d’infections 
