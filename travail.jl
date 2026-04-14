@@ -10,6 +10,7 @@
 #      prenom: Mathilde
 #      matricule: 20267325 
 #      github: Mathilde389
+# ---
 
 # # Introduction
 # Lors de propagation rapide de maladies infectieuses, comme les épidémies, il est essentiel
@@ -41,38 +42,60 @@
 # individus. 
 
 # # Présentation du modèle
-# Nous utilisons un modèle de simulation individu-centré pour représenter la propagation d’une maladie infectieuse dans une population. 
-# Les modèles individu-centrés permettent de représenter explicitement les interactions entre individus et d’évaluer l’effet de différentes 
-# stratégies de contrôle, notamment le dépistage et la vaccination (Adam & Arduin, 2023). Chaque individu est représenté par un agent 
-# évoluant dans un espace discret bidimensionnel (lattice) défini par des coordonnées allant de -50 à 50 sur les axes x et y. La population 
-# initiale est composée de 3750 agents distribués aléatoirement dans cet espace.
 
-# Chaque agent possède plusieurs caractéristiques : une position spatiale, un état sanitaire (infectieux ou sain), un compteur de durée 
-# d’infection (fixé à 21 jours), ainsi qu’un identifiant unique. Lorsqu’un agent devient infectieux, il le reste pendant toute la durée 
-# de la maladie, qui est toujours fatale dans ce modèle. La population est initialement entièrement naïve, c’est-à-dire qu’aucun individu 
-# ne possède d’immunité au départ.
+# Nous utilisons un modèle de simulation individu-centré pour représenter la
+# propagation d’une maladie infectieuse dans une population. Les modèles
+# individu-centrés permettent de représenter explicitement les interactions
+# entre individus et d’évaluer l’effet de différentes stratégies de contrôle,
+# notamment le dépistage et la vaccination (Adam & Arduin, 2023). Chaque
+# individu est représenté par un agent évoluant dans un espace discret
+# bidimensionnel (lattice) défini par des coordonnées allant de -50 à 50 sur les
+# axes x et y. La population initiale est composée de 3750 agents distribués
+# aléatoirement dans cet espace.
 
-# À chaque pas de temps (génération), les agents se déplacent aléatoirement dans la grille. La transmission de la maladie se produit lorsqu’un 
-# agent infectieux partage la même cellule qu’un agent sain. Dans ce cas, la probabilité de transmission est fixée à 0,4. Les agents infectieux 
-# voient leur durée d’infection diminuer à chaque génération, et sont retirés de la population lorsque cette durée atteint zéro, ce qui correspond 
-# à leur décès.
+# Chaque agent possède plusieurs caractéristiques : une position spatiale, un
+# état sanitaire (infectieux ou sain), un compteur de durée d’infection (fixé à
+# 21 jours), ainsi qu’un identifiant unique. Lorsqu’un agent devient infectieux,
+# il le reste pendant toute la durée de la maladie, qui est toujours fatale dans
+# ce modèle. La population est initialement entièrement naïve, c’est-à-dire
+# qu’aucun individu ne possède d’immunité au départ.
 
-# Afin de simuler une intervention sanitaire, un mécanisme combinant dépistage et vaccination a été intégré au modèle. L’intervention est
-# déclenchée uniquement après la détection du premier décès dans la population. Une stratégie de dépistage actif est alors mise en place à l’aide 
-# de tests antigéniques rapides (RAT), qui permettent d’identifier les individus infectieux avec une probabilité élevée (Lasser et al., 2021 ; Tran et al., 2023). 
-# Lorsqu’un cas est détecté, une intervention ciblée est appliquée à ses contacts, ce qui reflète les approches modernes de contrôle en épidémiologie 
+# À chaque pas de temps (génération), les agents se déplacent aléatoirement dans
+# la grille. La transmission de la maladie se produit lorsqu’un agent infectieux
+# partage la même cellule qu’un agent sain. Dans ce cas, la probabilité de
+# transmission est fixée à 0,4. Les agents infectieux voient leur durée
+# d’infection diminuer à chaque génération, et sont retirés de la population
+# lorsque cette durée atteint zéro, ce qui correspond à leur décès.
+
+# Afin de simuler une intervention sanitaire, un mécanisme combinant dépistage
+# et vaccination a été intégré au modèle. L’intervention est déclenchée
+# uniquement après la détection du premier décès dans la population. Une
+# stratégie de dépistage actif est alors mise en place à l’aide de tests
+# antigéniques rapides (RAT), qui permettent d’identifier les individus
+# infectieux avec une probabilité élevée (Lasser et al., 2021 ; Tran et al.,
+# 2023). Lorsqu’un cas est détecté, une intervention ciblée est appliquée à ses
+# contacts, ce qui reflète les approches modernes de contrôle en épidémiologie
 # (Lasser et al., 2021).
-# Dans ce modèle, les tests RAT présentent une probabilité de détection de 95 %, pour un coût unitaire de 4 $, avec un budget total d’intervention 
-# fixé à 21 000 $. Ils offrent donc un moyen rapide d’identifier les individus infectieux, bien que leur sensibilité imparfaite puisse en limiter 
-# l’efficacité dans le contrôle global de l’épidémie (Lasser et al., 2021).
 
-# Lorsqu’un individu est testé positif, les agents présents dans la même cellule spatiale (considérés comme ses contacts proches) peuvent être vaccinés, 
-# à condition que le budget le permette. Le coût d’une vaccination est de 17$ par individu. Le vaccin est entièrement efficace, mais son effet n’est actif 
-# qu’après un délai de deux générations. Une fois le vaccin actif, l’agent ne peut plus être infecté ni transmettre la maladie.
+# Dans ce modèle, les tests RAT présentent une probabilité de détection de 95 %,
+# pour un coût unitaire de 4 $, avec un budget total d’intervention fixé à 21
+# 000 $. Ils offrent donc un moyen rapide d’identifier les individus infectieux,
+# bien que leur sensibilité imparfaite puisse en limiter l’efficacité dans le
+# contrôle global de l’épidémie (Lasser et al., 2021).
 
-#La simulation se poursuit jusqu’à l’extinction de la maladie (absence d’individus infectieux) ou jusqu’à un maximum de 2000 générations. Les principales 
-# variables suivies sont le nombre d’individus sains et infectieux au cours du temps, ainsi que le nombre total de décès, permettant d’évaluer l’efficacité 
-# de la stratégie de vaccination en comparaison avec un scénario sans intervention.
+# Lorsqu’un individu est testé positif, les agents présents dans la même cellule
+# spatiale (considérés comme ses contacts proches) peuvent être vaccinés, à
+# condition que le budget le permette. Le coût d’une vaccination est de 17$ par
+# individu. Le vaccin est entièrement efficace, mais son effet n’est actif
+# qu’après un délai de deux générations. Une fois le vaccin actif, l’agent ne
+# peut plus être infecté ni transmettre la maladie.
+
+#La simulation se poursuit jusqu’à l’extinction de la maladie (absence
+# d’individus infectieux) ou jusqu’à un maximum de 2000 générations. Les
+# principales variables suivies sont le nombre d’individus sains et infectieux
+# au cours du temps, ainsi que le nombre total de décès, permettant d’évaluer
+# l’efficacité de la stratégie de vaccination en comparaison avec un scénario
+# sans intervention.
 
 
 # # Implémentation
@@ -80,15 +103,22 @@
 # ## Packages nécessaires
 
 # Initialisation
+
+using Random
+using CairoMakie
+using UUIDs
+
 Random.seed!(123456)
 CairoMakie.activate!(px_per_unit=6.0)
 
 # Identifiants uniques pour chaque agent
+
 UUIDs.uuid4()
 
 # ## Création des types
 
 # Structure d'un agent (individu)
+
 Base.@kwdef mutable struct Agent
     x::Int64 = 0 # position x
     y::Int64 = 0 # position y
@@ -102,6 +132,7 @@ Base.@kwdef mutable struct Agent
 end
 
 # Structure du paysage (espace de simulation)
+
 Base.@kwdef mutable struct Landscape
     xmin::Int64 = -50
     xmax::Int64 = 50
@@ -116,8 +147,11 @@ L = Landscape(xmin=-50, xmax=50, ymin=-50, ymax=50)
 # ## Génération d'agents aléatoires
 
 # Crée un agent à une position aléatoire
+
 Random.rand(::Type{Agent}, L::Landscape) = Agent(x=rand(L.xmin:L.xmax), y=rand(L.ymin:L.ymax))
+
 # Crée plusieurs agents
+
 Random.rand(::Type{Agent}, L::Landscape, n::Int64) = [rand(Agent, L) for _ in 1:n]
 
 # Cette fonction nous permet donc de générer un nouvel agent dans un paysage:
@@ -150,19 +184,24 @@ end
 # ## Fonctions utiles
 
 # Déterminer si l'agent est infectueux 
+
 isinfectious(agent::Agent) = agent.infectious
 
 # Déterminer si l'agent est sain
+
 ishealthy(agent::Agent) = !isinfectious(agent)
 
 # Type population = liste d'agents
+
 const Population = Vector{Agent}
 
 # Filtrage des agents
+
 infectious(pop::Population) = filter(isinfectious, pop)
 healthy(pop::Population) = filter(ishealthy, pop)
 
 # Agents dans la même cellule (même position)
+
 incell(target::Agent, pop::Population) = filter(ag -> (ag.x, ag.y) == (target.x, target.y), pop)
 
 # ## Initialisation
@@ -173,15 +212,18 @@ function make_population(L::Landscape, n::Int)
 end
 
 # Simplification de l'affichage de cette population
+
 Base.show(io::IO, ::MIME"text/plain", p::Population) = print(io, "Une population avec $(length(p)) agents")
 
 # Génération de la population initiale
 population = make_population(L, 3750)
 
 # Cas index (premier infecté)
+
 rand(population).infectious = true
 
 # ## Paramètres intervention
+
 budget = 21000 # budget total
 cost_vaccine = 17 # coût vaccinated
 cost_test = 4 # coût test
@@ -191,6 +233,7 @@ first_death = false
 deaths = 0                     # compteur de morts
 
 # Fonction de vaccination
+
 function vaccinate!(agent::Agent)
     if !agent.vaccinated
         agent.vaccinated = true
@@ -229,19 +272,19 @@ function run_simulation(L::Landscape, n::Int, budget_total; with_intervention=tr
 
         tick += 1
 
-        # Déplacement
+        ## Déplacement
         for agent in population
             move!(agent, L)
         end
 
-        # Vaccination delay
+        ## Mise à jour délai vaccin
         for agent in population
             if agent.vaccinated
                 agent.days_after_vax += 1
             end
         end
 
-        # Infection
+        ## Infection
         for agent in Random.shuffle(infectious(population))
             for neighbor in healthy(incell(agent, population))
 
@@ -254,16 +297,17 @@ function run_simulation(L::Landscape, n::Int, budget_total; with_intervention=tr
             end
         end
 
-        # Disease progression
+        ## Progression maladie
         for agent in infectious(population)
             agent.clock -= 1
         end
 
-        # Death
+        ## Décès
         before = length(population)
         population = filter(a -> a.clock > 0, population)
         after = length(population)
 
+        ## Déclenche intervention
         if !first_death && after < before
             intervention_started = true
             first_death = true
@@ -271,7 +315,7 @@ function run_simulation(L::Landscape, n::Int, budget_total; with_intervention=tr
 
         deaths += (before - after)
 
-        # Intervention
+        ## Intervention (activable)
         if with_intervention && intervention_started && budget > 0
 
             for agent in population
@@ -307,6 +351,7 @@ function run_simulation(L::Landscape, n::Int, budget_total; with_intervention=tr
 end
 
 # ## Analyse des résultats
+
 using Statistics
 
 n_runs = 50
@@ -348,9 +393,9 @@ println("Variance = ", var_without)
 println("\nGAIN (morts évités) = ", mean_without - mean_with)
 
 # Graphique comparatif
-f2 = Figure()
+f1 = Figure();
 
-ax = Axis(f2[1, 1];
+ax = Axis(f1[1, 1];
     xlabel="Simulation",
     ylabel="Nombre de morts",
     title="Comparaison des décès avec et sans intervention"
@@ -360,7 +405,8 @@ scatter!(ax, 1:length(deaths_with), deaths_with, label="Avec intervention", colo
 scatter!(ax, 1:length(deaths_without), deaths_without, label="Sans intervention", color=:red)
 
 axislegend(ax)
-current_figure()
+save("sans-intervention", f1)
+f1
 
 # **Figure 1: Comparaison des décès**
 # Cette figure présente, pour chacune des 50 simulations, le nombre total de décès observés 
@@ -373,10 +419,10 @@ current_figure()
 println("Moyenne morts avec intervention = ", mean(deaths_with))
 println("Moyenne morts sans intervention = ", mean(deaths_without))
 
-f3 = Figure()
+f2 = Figure();
 
 # Graphiqe avec intervention
-ax1 = Axis(f3[1, 1],
+ax1 = Axis(f2[1, 1],
     title = "Évolution AVEC intervention",
     xlabel = "Temps",
     ylabel = "Population"
@@ -389,7 +435,7 @@ lines!(ax1, 1:length(D_with), D_with, label="Décédés")
 axislegend(ax1)
 
 # Graphique sans intervention
-ax2 = Axis(f3[2, 1],
+ax2 = Axis(f2[2, 1],
     title = "Évolution SANS intervention",
     xlabel = "Temps",
     ylabel = "Population"
@@ -401,7 +447,8 @@ lines!(ax2, 1:length(D_without), D_without, label="Décédés")
 
 axislegend(ax2)
 
-current_figure()
+save("evolution", f2)
+f2
 
 # **Figure 2: Dynamique  temporelle de l’épidémie avec intervention**
 # Cette figure illustre l’évolution du nombre d’individus sains, infectieux et décédés au cours du 
@@ -452,29 +499,6 @@ current_figure()
 # Dans l’ensemble, ces résultats mettent en évidence l’impact mesurable de l’intervention sur la réduction de la 
 # mortalité et sur la dynamique de propagation de la maladie, tout en illustrant la variabilité importante des 
 # trajectoires épidémiques entre simulations.
-
-
-# ## Analyse events
-all_events = vcat([r[3] for r in results_with]...)
-
-infxn_by_uuid = countmap([e.from for e in all_events])
-nb_inxfn = countmap(values(infxn_by_uuid))
-
-println("Nombre d'agents infectieux uniques : ", length(infxn_by_uuid))
-
-# ## Inclure du code
-
-# Tous les fichiers dans le dossier `code` peuvent être ajoutés au travail
-# final. C'est par exemple utile pour déclarer l'ensemble des fonctions du
-# modèle hors du document principal.
-
-# Le contenu des fichiers est inclus avec `include("code/nom_fichier.jl")`.
-
-# Attention! Il faut que le code soit inclus au bon endroit (avant que les
-# fonctions déclarées soient appellées).
-
-include("code/01_test.jl")
-
 
 # ## Discussion
 # Les résultats obtenus montrent que l’intervention basée sur le dépistage et la vaccination ciblée permet 
