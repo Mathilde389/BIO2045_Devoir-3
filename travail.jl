@@ -102,7 +102,7 @@
 
 # ## Packages nécessaires
 
-# Initialisation
+## Initialisation
 
 using Random
 using CairoMakie
@@ -111,27 +111,27 @@ using UUIDs
 Random.seed!(123456)
 CairoMakie.activate!(px_per_unit=6.0)
 
-# Identifiants uniques pour chaque agent
+## Identifiants uniques pour chaque agent
 
 UUIDs.uuid4()
 
 # ## Création des types
 
-# Structure d'un agent (individu)
+## Structure d'un agent (individu)
 
 Base.@kwdef mutable struct Agent
-    x::Int64 = 0 # position x
-    y::Int64 = 0 # position y
-    clock::Int64 = 21 # durée de la maladie est de 21 jours
-    infectious::Bool = false # état infectieux
+    x::Int64 = 0                     ## position x
+    y::Int64 = 0                     ## position y
+    clock::Int64 = 21                ## durée de la maladie est de 21 jours
+    infectious::Bool = false         ## état infectieux
     tested::Bool = false 
-      # Vaccination
-    vaccinated::Bool = false        # vacciné ou non
-    days_after_vax::Int64 = 0        # délai avant efficacité
-    id::UUIDs.UUID = UUIDs.uuid4() # identifiant unique
+    ## Vaccination
+    vaccinated::Bool = false         ## vacciné ou non
+    days_after_vax::Int64 = 0        ## délai avant efficacité
+    id::UUIDs.UUID = UUIDs.uuid4()   ## identifiant unique
 end
 
-# Structure du paysage (espace de simulation)
+## Structure du paysage (espace de simulation)
 
 Base.@kwdef mutable struct Landscape
     xmin::Int64 = -50
@@ -140,29 +140,29 @@ Base.@kwdef mutable struct Landscape
     ymax::Int64 = 50
 end
 
-# Création du paysage
+## Création du paysage
 
 L = Landscape(xmin=-50, xmax=50, ymin=-50, ymax=50)
 
 # ## Génération d'agents aléatoires
 
-# Crée un agent à une position aléatoire
+## Crée un agent à une position aléatoire
 
 Random.rand(::Type{Agent}, L::Landscape) = Agent(x=rand(L.xmin:L.xmax), y=rand(L.ymin:L.ymax))
 
-# Crée plusieurs agents
+## Crée plusieurs agents
 
 Random.rand(::Type{Agent}, L::Landscape, n::Int64) = [rand(Agent, L) for _ in 1:n]
 
-# Cette fonction nous permet donc de générer un nouvel agent dans un paysage:
+## Cette fonction nous permet donc de générer un nouvel agent dans un paysage:
 
 rand(Agent, L)
 
-# Mais aussi de générer plusieurs agents:
+## Mais aussi de générer plusieurs agents:
 
 rand(Agent, L, 3)
 
-# Déplacement des agents
+## Déplacement des agents
 
 function move!(A::Agent, L::Landscape; torus=true)
     A.x += rand(-1:1)
@@ -183,61 +183,61 @@ end
 
 # ## Fonctions utiles
 
-# Déterminer si l'agent est infectueux 
+## Déterminer si l'agent est infectueux 
 
 isinfectious(agent::Agent) = agent.infectious
 
-# Déterminer si l'agent est sain
+## Déterminer si l'agent est sain
 
 ishealthy(agent::Agent) = !isinfectious(agent)
 
-# Type population = liste d'agents
+## Type population = liste d'agents
 
 const Population = Vector{Agent}
 
-# Filtrage des agents
+## Filtrage des agents
 
 infectious(pop::Population) = filter(isinfectious, pop)
 healthy(pop::Population) = filter(ishealthy, pop)
 
-# Agents dans la même cellule (même position)
+## Agents dans la même cellule (même position)
 
 incell(target::Agent, pop::Population) = filter(ag -> (ag.x, ag.y) == (target.x, target.y), pop)
 
 # ## Initialisation
 
-# Génération de la population
+## Génération de la population
 function make_population(L::Landscape, n::Int)
     return rand(Agent, L, n)
 end
 
-# Simplification de l'affichage de cette population
+## Simplification de l'affichage de cette population
 
 Base.show(io::IO, ::MIME"text/plain", p::Population) = print(io, "Une population avec $(length(p)) agents")
 
-# Génération de la population initiale
+## Génération de la population initiale
 population = make_population(L, 3750)
 
-# Cas index (premier infecté)
+## Cas index (premier infecté)
 
 rand(population).infectious = true
 
 # ## Paramètres intervention
 
-budget = 21000 # budget total
-cost_vaccine = 17 # coût vaccinated
-cost_test = 4 # coût test
+budget = 21000         ## budget total
+cost_vaccine = 17      ## coût vaccinated
+cost_test = 4          ## coût test
 
-intervention_started = false   # commence après premier décès
+intervention_started = false   ## commence après premier décès
 first_death = false
-deaths = 0                     # compteur de morts
+deaths = 0                     ## compteur de morts
 
 # Fonction de vaccination
 
 function vaccinate!(agent::Agent)
     if !agent.vaccinated
         agent.vaccinated = true
-        agent.days_after_vax = 0   # délai avant activation = 2 jours (immunité après 2 ticks)
+        agent.days_after_vax = 0   ## délai avant activation = 2 jours (immunité après 2 ticks)
     end
 end
 
@@ -341,7 +341,7 @@ function run_simulation(L::Landscape, n::Int, budget_total; with_intervention=tr
                 end
             end
         end
-        # Suivi des états
+        ## Suivi des états
         push!(S, length(healthy(population)))
         push!(I, length(infectious(population)))
         push!(D, deaths)
@@ -359,7 +359,7 @@ n_runs = 50
 results_with = [run_simulation(L, 3750, 21000; with_intervention=true) for _ in 1:n_runs]
 results_without = [run_simulation(L, 3750, 21000; with_intervention=false) for _ in 1:n_runs]
 
-# Une simulation pour visualisation (courbes temporelles)
+## Une simulation pour visualisation (courbes temporelles)
 sim_with = run_simulation(L, 3750, 21000; with_intervention=true)
 sim_without = run_simulation(L, 3750, 21000; with_intervention=false)
 
@@ -392,7 +392,7 @@ println("Variance = ", var_without)
 
 println("\nGAIN (morts évités) = ", mean_without - mean_with)
 
-# Graphique comparatif
+# ## Graphique comparatif
 f1 = Figure()
 
 ax = Axis(f1[1, 1];
@@ -421,7 +421,7 @@ println("Moyenne morts sans intervention = ", mean(deaths_without))
 
 f2 = Figure()
 
-# Graphiqe avec intervention
+# ## Graphiqe avec intervention
 ax1 = Axis(f2[1, 1],
     title = "Évolution AVEC intervention",
     xlabel = "Temps",
@@ -434,7 +434,7 @@ lines!(ax1, 1:length(D_with), D_with, label="Décédés")
 
 axislegend(ax1)
 
-# Graphique sans intervention
+# ## Graphique sans intervention
 ax2 = Axis(f2[2, 1],
     title = "Évolution SANS intervention",
     xlabel = "Temps",
