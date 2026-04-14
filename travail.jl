@@ -393,13 +393,12 @@ println("Variance = ", var_without)
 println("\nGAIN (morts évités) = ", mean_without - mean_with)
 
 # ## Graphique comparatif
-f1 = Figure()
+f1 = Figure();
 
 ax = Axis(f1[1, 1];
     xlabel="Simulation",
     ylabel="Nombre de morts",
-    title="Comparaison des décès avec et sans intervention"
-)
+    title="Comparaison des décès avec et sans intervention")
 
 scatter!(ax, 1:length(deaths_with), deaths_with, label="Avec intervention", color=:blue)
 scatter!(ax, 1:length(deaths_without), deaths_without, label="Sans intervention", color=:red)
@@ -419,14 +418,13 @@ display(f1)
 println("Moyenne morts avec intervention = ", mean(deaths_with))
 println("Moyenne morts sans intervention = ", mean(deaths_without))
 
-f2 = Figure()
+f2 = Figure();
 
-# ## Graphiqe avec intervention
+## Graphiqe avec intervention
 ax1 = Axis(f2[1, 1],
     title = "Évolution AVEC intervention",
     xlabel = "Temps",
-    ylabel = "Population"
-)
+    ylabel = "Population")
 
 lines!(ax1, 1:length(S_with), S_with, label="Sains")
 lines!(ax1, 1:length(I_with), I_with, label="Infectieux")
@@ -434,19 +432,17 @@ lines!(ax1, 1:length(D_with), D_with, label="Décédés")
 
 axislegend(ax1)
 
-# ## Graphique sans intervention
+## Graphique sans intervention
 ax2 = Axis(f2[2, 1],
     title = "Évolution SANS intervention",
     xlabel = "Temps",
-    ylabel = "Population"
-)
+    ylabel = "Population")
 
 lines!(ax2, 1:length(S_without), S_without, label="Sains")
 lines!(ax2, 1:length(I_without), I_without, label="Infectieux")
 lines!(ax2, 1:length(D_without), D_without, label="Décédés")
 
 axislegend(ax2)
-
 save("evolution".png, f2)
 display(f2)
 
