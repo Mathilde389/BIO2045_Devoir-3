@@ -393,7 +393,7 @@ println("Variance = ", var_without)
 println("\nGAIN (morts évités) = ", mean_without - mean_with)
 
 # Graphique comparatif
-f1 = Figure();
+f1 = Figure()
 
 ax = Axis(f1[1, 1];
     xlabel="Simulation",
@@ -406,7 +406,7 @@ scatter!(ax, 1:length(deaths_without), deaths_without, label="Sans intervention"
 
 axislegend(ax)
 save("sans-intervention", f1)
-f1
+display(f1)
 
 # **Figure 1: Comparaison des décès**
 # Cette figure présente, pour chacune des 50 simulations, le nombre total de décès observés 
@@ -419,7 +419,7 @@ f1
 println("Moyenne morts avec intervention = ", mean(deaths_with))
 println("Moyenne morts sans intervention = ", mean(deaths_without))
 
-f2 = Figure();
+f2 = Figure()
 
 # Graphiqe avec intervention
 ax1 = Axis(f2[1, 1],
@@ -448,7 +448,7 @@ lines!(ax2, 1:length(D_without), D_without, label="Décédés")
 axislegend(ax2)
 
 save("evolution", f2)
-f2
+display(f2)
 
 # **Figure 2: Dynamique  temporelle de l’épidémie avec intervention**
 # Cette figure illustre l’évolution du nombre d’individus sains, infectieux et décédés au cours du 
