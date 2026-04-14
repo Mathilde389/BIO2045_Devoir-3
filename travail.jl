@@ -33,7 +33,7 @@
 # des faux positives ou des faux négatifs. Les faux négatifs sont ceux qui mettent 
 # à risque le reste de la population puisqu’un individu infecté est identifié comme 
 # sain et peux donc infecter d’autres personnes. De plus les vaccins n’offrent pas 
-#toujours une protection immédiate, et il y a donc une période pendant laquelle les
+# toujours une protection immédiate, et il y a donc une période pendant laquelle les
 # individus vaccinés sont vulnérable. Le budget attribué aux stratégies de vaccination
 # est également une limite.
 
@@ -90,7 +90,7 @@
 # qu’après un délai de deux générations. Une fois le vaccin actif, l’agent ne
 # peut plus être infecté ni transmettre la maladie.
 
-#La simulation se poursuit jusqu’à l’extinction de la maladie (absence
+# La simulation se poursuit jusqu’à l’extinction de la maladie (absence
 # d’individus infectieux) ou jusqu’à un maximum de 2000 générations. Les
 # principales variables suivies sont le nombre d’individus sains et infectieux
 # au cours du temps, ainsi que le nombre total de décès, permettant d’évaluer
@@ -405,7 +405,7 @@ scatter!(ax, 1:length(deaths_with), deaths_with, label="Avec intervention", colo
 scatter!(ax, 1:length(deaths_without), deaths_without, label="Sans intervention", color=:red)
 
 axislegend(ax)
-save("sans-intervention", f1)
+save("sans-intervention".png, f1)
 display(f1)
 
 # **Figure 1: Comparaison des décès**
@@ -447,7 +447,7 @@ lines!(ax2, 1:length(D_without), D_without, label="Décédés")
 
 axislegend(ax2)
 
-save("evolution", f2)
+save("evolution".png, f2)
 display(f2)
 
 # **Figure 2: Dynamique  temporelle de l’épidémie avec intervention**
