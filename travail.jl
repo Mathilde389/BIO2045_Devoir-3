@@ -151,67 +151,67 @@
 
 # ## Packages nécessaires
 
-## Initialisation
+# Initialisation
 
 using Random
 using CairoMakie
 using UUIDs
 
 Random.seed!(123456)
-CairoMakie.activate!(px_per_unit=6.0)
+CairoMakie.activate!(px_per_unit=6.0) ## Permet de configurer l'affichage des figures
 
-## Identifiants uniques pour chaque agent
+# Identifiants uniques pour chaque agent
 
 UUIDs.uuid4()
 
 # ## Création des types
 
-## Structure d'un agent (individu)
+# Structure d'un agent (individu)
 
-Base.@kwdef mutable struct Agent
-    x::Int64 = 0                     ## position x
-    y::Int64 = 0                     ## position y
-    clock::Int64 = 21                ## durée de la maladie est de 21 jours
-    infectious::Bool = false         ## état infectieux
-    tested::Bool = false 
+Base.@kwdef mutable struct Agent ## Défini un individu modifiable
+    x::Int64 = 0 ## position x
+    y::Int64 = 0 ## position y
+    clock::Int64 = 21 ## durée de la maladie est de 21 jours
+    infectious::Bool = false ## état infectieux
+    tested::Bool = false ## testé ou non
     ## Vaccination
-    vaccinated::Bool = false         ## vacciné ou non
+    vaccinated::Bool = false        ## vacciné ou non
     days_after_vax::Int64 = 0        ## délai avant efficacité
-    id::UUIDs.UUID = UUIDs.uuid4()   ## identifiant unique
+    id::UUIDs.UUID = UUIDs.uuid4() ## identifiant unique
 end
 
-## Structure du paysage (espace de simulation)
+# Structure du paysage (espace de simulation)
 
-Base.@kwdef mutable struct Landscape
+Base.@kwdef mutable struct Landscape ## Définit les limites de l'espace
     xmin::Int64 = -50
     xmax::Int64 = 50
     ymin::Int64 = -50
     ymax::Int64 = 50
 end
 
-## Création du paysage
+# Création du paysage
 
 L = Landscape(xmin=-50, xmax=50, ymin=-50, ymax=50)
 
 # ## Génération d'agents aléatoires
 
-## Crée un agent à une position aléatoire
+# Crée un agent à une position aléatoire
 
 Random.rand(::Type{Agent}, L::Landscape) = Agent(x=rand(L.xmin:L.xmax), y=rand(L.ymin:L.ymax))
 
-## Crée plusieurs agents
+# Crée plusieurs agents (n)
 
 Random.rand(::Type{Agent}, L::Landscape, n::Int64) = [rand(Agent, L) for _ in 1:n]
 
-## Cette fonction nous permet donc de générer un nouvel agent dans un paysage:
+# Cette fonction nous permet donc de générer un nouvel agent dans un paysage:
 
 rand(Agent, L)
 
-## Mais aussi de générer plusieurs agents:
+# Mais aussi de générer plusieurs agents:
 
 rand(Agent, L, 3)
 
-## Déplacement des agents
+# Déplacement des agents de -1, 0 ou +1 en x et y
 
 function move!(A::Agent, L::Landscape; torus=true)
     A.x += rand(-1:1)
@@ -232,50 +232,51 @@ end
 
 # ## Fonctions utiles
 
-## Déterminer si l'agent est infectueux 
+# Déterminer si l'agent est infectueux 
 
 isinfectious(agent::Agent) = agent.infectious
 
-## Déterminer si l'agent est sain
+# Déterminer si l'agent est sain
 
 ishealthy(agent::Agent) = !isinfectious(agent)
 
-## Type population = liste d'agents
+# Type population = liste d'agents
 
 const Population = Vector{Agent}
 
-## Filtrage des agents
+# Filtrage des agents
 
 infectious(pop::Population) = filter(isinfectious, pop)
 healthy(pop::Population) = filter(ishealthy, pop)
 
-## Agents dans la même cellule (même position)
+# Agents dans la même cellule (même position)
 
 incell(target::Agent, pop::Population) = filter(ag -> (ag.x, ag.y) == (target.x, target.y), pop)
 
 # ## Initialisation
 
-## Génération de la population
+# Génération de la population
 function make_population(L::Landscape, n::Int)
     return rand(Agent, L, n)
 end
 
-## Simplification de l'affichage de cette population
+# Simplification de l'affichage de cette population
 
 Base.show(io::IO, ::MIME"text/plain", p::Population) = print(io, "Une population avec $(length(p)) agents")
 
-## Génération de la population initiale
+# Génération de la population initiale
+
 population = make_population(L, 3750)
 
-## Cas index (premier infecté)
+# Cas index (premier infecté)
 
 rand(population).infectious = true
 
 # ## Paramètres intervention
 
-budget = 21000         ## budget total
-cost_vaccine = 17      ## coût vaccinated
-cost_test = 4          ## coût test
+budget = 21000      ## budget total
+cost_vaccine = 17   ## coût vaccinated
+cost_test = 4       ## coût test
 
 intervention_started = false   ## commence après premier décès
 first_death = false
@@ -283,120 +284,140 @@ deaths = 0                     ## compteur de morts
 
 # Fonction de vaccination
 
-function vaccinate!(agent::Agent)
+function vaccinate!(agent::Agent) ## Rend un agent vacciné 
     if !agent.vaccinated
         agent.vaccinated = true
-        agent.days_after_vax = 0   ## délai avant activation = 2 jours (immunité après 2 ticks)
+        agent.days_after_vax = 0   ## Juste après la vaccination, l'agent n'est pas encore protégé
     end
 end
 
 # ## Simulation principale
 Base.@kwdef struct InfectionEvent
-    tick::Int
-    from::UUIDs.UUID
-    to::UUIDs.UUID
-    x::Int
-    y::Int
+    tick::Int                ## Moment (temps) où l'infection a lieu
+    from::UUIDs.UUID         ## identifiant de l'agent infectant
+    to::UUIDs.UUID           ## idendifiant de l'agent infecté
+    x::Int                   ## position x où l'infection se produit
+    y::Int                   ## position y où l'infection se produit
 end
 
+# Fonction principale de la simulation
 function run_simulation(L::Landscape, n::Int, budget_total; with_intervention=true)
 
-    population = make_population(L, n)
-    rand(population).infectious = true
+    population = make_population(L, n) ## Création d'une population de n agents dans le paysage
+    rand(population).infectious = true ## Choisit un agent au hasard et le rend infectieux (cas index)
 
-    events = InfectionEvent[]  
+    events = InfectionEvent[]  ## Liste pour stocker tous les événements d'infection
 
-    budget = budget_total
-    intervention_started = false
-    first_death = false
-    deaths = 0
+    budget = budget_total ## Initialisation du budget disponible pour les interventions
+    intervention_started = false ## Booléen indiquant si l'intervention a commencé
+    first_death = false ## Booléen pour détecter le premier décès
+    deaths = 0 ## Compteur total de décès
 
-    tick = 0
-    maxlength = 2000
-    S = Int[]
-    I = Int[]
-    D = Int[]
+    tick = 0 ## Temps initial
+    maxlength = 2000 ## Durée maximale de la simulation (2000 générations)
+    ## Liste pour stocker l'évolution des états
+    S = Int[] ## nombre de sains
+    I = Int[] ## nombre d'infectieux
+    D = Int[] ## nombre de morts cumulés
+    B = Int[] ## historique du budget
 
-    while (length(infectious(population)) > 0) && (tick < maxlength)
+    while (length(infectious(population)) > 0) && (tick < maxlength) ## Boucle principale: continue tant qu'il y a des infectés et que la durée max n'est pas atteinte
 
-        tick += 1
+        tick += 1 ## Incrément du temps
 
-        ## Déplacement
+        ## Déplacement : chaque agent se déplace aléatoirement dans le paysage
         for agent in population
             move!(agent, L)
         end
 
-        ## Mise à jour délai vaccin
+        ## Mise à jour délai vaccin : si un agent est vacciné, on augmente le temps depuis la vaccination
         for agent in population
             if agent.vaccinated
                 agent.days_after_vax += 1
             end
         end
 
-        ## Infection
-        for agent in Random.shuffle(infectious(population))
-            for neighbor in healthy(incell(agent, population))
+        ## Infection 
+        for agent in Random.shuffle(infectious(population)) ## On parcourt les agents infectieux dans un ordre aléatoire
+            for neighbor in healthy(incell(agent, population)) ## On regarde les voisins sains dans la même cellule 
 
-                immune = neighbor.vaccinated && neighbor.days_after_vax >= 2
+                immune = neighbor.vaccinated && neighbor.days_after_vax >= 2 ## Vérifie si le voisin est protégé par le vaccin (après 2 jours)
 
-                if rand() <= 0.4 && !immune
-                    neighbor.infectious = true
-                    push!(events, InfectionEvent(tick, agent.id, neighbor.id, neighbor.x, neighbor.y))
+                if rand() <= 0.4 && !immune ## Probabilité de transmission de 40% si non immunisé
+                    neighbor.infectious = true ## Le voisin devient infectieux
+                    push!(events, InfectionEvent(tick, agent.id, neighbor.id, neighbor.x, neighbor.y)) ## On enregistre l'événement d'infection
                 end
             end
         end
 
-        ## Progression maladie
+        ## Progression maladie : Chaque agent infecté voit son compteur de maladie diminuer
         for agent in infectious(population)
             agent.clock -= 1
         end
 
         ## Décès
-        before = length(population)
-        population = filter(a -> a.clock > 0, population)
-        after = length(population)
+        before = length(population) ## Nombre d'agents avant suppression des morts
+        population = filter(a -> a.clock > 0, population) ##  # On retire les agents dont le temps de vie (clock) est écoulé
+        after = length(population) ## Nombre d'agents après suppression
 
-        ## Déclenche intervention
+        ## Déclenche intervention : Si c'est le premier décès, on active l'intervention
         if !first_death && after < before
             intervention_started = true
             first_death = true
         end
 
-        deaths += (before - after)
+        deaths += (before - after) ## Mise à jours du nombre total de décès
 
         ## Intervention (activable)
-        if with_intervention && intervention_started && budget > 0
+        if with_intervention && intervention_started && budget > 0 && tick % 5 == 0 ## Vérifie que l'intervention est activée, qu'elle commence après un décès, qu'il reste du budget et que l'on est à un tuck multiple de 5 (tests prériodiques)
 
-            for agent in population
+            ## Faire une liste vide pour stocker les agents à risque afin de tester ceux qui sont autour des infectés
+            a_risque = Agent[]
 
-                if !agent.tested && budget >= 4
-                    budget -= 4
-                    agent.tested = true
+            for inf in infectious(population) ## Parcourt tous les agents infectés
+                for neighbor in incell(inf, population) ## Parcourt tous les agents dans la même cellule que l'infecté
+                    push!(a_risque, neighbor) ## Ajoute chaque voisin dans la liste des agetns à risque
+                end
+            end
 
-                    positive = agent.infectious ? rand() <= 0.95 : rand() <= 0.05
+            a_risque = unique(a_risque) # Vient supprimer les doublons (un agent peut apparaître plusieurs fois)
+            candidates = isempty(a_risque) ? population : a_risque # Si aucun agent à risque, on prend toute la population, sinon on teste que les agents à risque
+            n_tests_per_tick = 150   ## 150 agents testés à ce tick
+            candidates = Random.shuffle(population)[1:min(n_tests_per_tick, length(population))] ## Sélection random d'agents et en garde maximum 50
 
-                    if positive
-                        for neighbor in incell(agent, population)
-                            if budget >= 17 && !neighbor.vaccinated
-                                vaccinate!(neighbor)
-                                budget -= 17
+            for agent in candidates ## Parcours les 150 agents sélectionnés aléatoirement
+
+                if !agent.tested && budget >= 4 ## Si l'agent n'a pas encore été testé et que le budget le permet
+                    budget -= 4 ## Coût du test
+                    agent.tested = true ## Marque l'agent comme testé
+
+                    positive = agent.infectious ? rand() <= 0.95 : rand() <= 0.05 ## Résultat du test (avec faux positifs et faux négatifs)
+
+                    if positive ## Si test positif
+                        agent.infectious = false # Isolement des cas positifs pour empêcher la propagation de la maladie
+                        for neighbor in incell(agent, population) ## On vaccine tous les agents dans la même cellule
+                            if budget >= 17 && !neighbor.vaccinated ## Si budget suffisant et agent non vacciné
+                                vaccinate!(neighbor) ## Vacciation du voisin
+                                budget -= 17 ## Coût du vaccin
                             end
                         end
                     end
                 end
 
-                if budget <= 0
+                if budget <= 0 ## Arrêt si budget épuisé
                     break
                 end
             end
         end
         ## Suivi des états
-        push!(S, length(healthy(population)))
-        push!(I, length(infectious(population)))
-        push!(D, deaths)
+        push!(S, length(healthy(population))) ## Enregistre le nombre d'agents sains
+        push!(I, length(infectious(population))) ## Enregistre le nombre d'agents infectieux
+        push!(D, deaths) ## Enregistre le nombre total de morts
+        push!(B, budget) ## 
     end
 
-    return deaths, budget, events, S, I, D
+    ## Retourne: nombre total de morts, budget restant, liste des infections, historique S/I/D/B
+    return deaths, budget, events, S, I, D, B
 end
 
 # ## Analyse des résultats
@@ -408,7 +429,7 @@ n_runs = 50
 results_with = [run_simulation(L, 3750, 21000; with_intervention=true) for _ in 1:n_runs]
 results_without = [run_simulation(L, 3750, 21000; with_intervention=false) for _ in 1:n_runs]
 
-## Une simulation pour visualisation (courbes temporelles)
+# Une simulation pour visualisation (courbes temporelles)
 sim_with = run_simulation(L, 3750, 21000; with_intervention=true)
 sim_without = run_simulation(L, 3750, 21000; with_intervention=false)
 
@@ -423,11 +444,16 @@ budget_without = [r[2] for r in results_without]
 
 println("Budget moyen restant (avec intervention) = ", mean(budget_with))
 
-mean_with = mean(deaths_with)
-mean_without = mean(deaths_without)
+# ## Statistiques
 
-var_with = var(deaths_with)
-var_without = var(deaths_without)
+mean_with = mean(deaths_with) ## moyenne nombre décès AVEC intervention
+mean_without = mean(deaths_without) ## moyenne nombre décès SANS intervention
+
+var_with = var(deaths_with) ## Calcule la variance des décès AVEC intervention
+var_without = var(deaths_without) ## Calcule la variance des décès SANS intervention
+
+std_with = std(deaths_with)       # écart-type AVEC intervention
+std_without = std(deaths_without) # écart-type SANS intervention
 
 println("\n RÉSULTATS SUR ", n_runs, " SIMULATIONS")
 
@@ -441,20 +467,20 @@ println("Variance = ", var_without)
 
 println("\nGAIN (morts évités) = ", mean_without - mean_with)
 
-# ## Graphique comparatif
+## Graphique comparatif
 f1 = Figure();
 
 ax = Axis(f1[1, 1];
     xlabel="Simulation",
     ylabel="Nombre de morts",
-    title="Comparaison des décès avec et sans intervention")
+    title="Comparaison des décès avec et sans intervention"
+)
 
 scatter!(ax, 1:length(deaths_with), deaths_with, label="Avec intervention", color=:blue)
 scatter!(ax, 1:length(deaths_without), deaths_without, label="Sans intervention", color=:red)
 
 axislegend(ax)
-save("sans-intervention".png, f1)
-display(f1)
+f1
 
 # **Figure 1: Comparaison des décès**
 # Cette figure présente, pour chacune des 50 simulations, le nombre total de décès observés 
@@ -473,7 +499,9 @@ f2 = Figure();
 ax1 = Axis(f2[1, 1],
     title = "Évolution AVEC intervention",
     xlabel = "Temps",
-    ylabel = "Population")
+    ylabel = "Population"
+)
+
 
 lines!(ax1, 1:length(S_with), S_with, label="Sains")
 lines!(ax1, 1:length(I_with), I_with, label="Infectieux")
@@ -485,15 +513,16 @@ axislegend(ax1)
 ax2 = Axis(f2[2, 1],
     title = "Évolution SANS intervention",
     xlabel = "Temps",
-    ylabel = "Population")
+    ylabel = "Population"
+)
 
 lines!(ax2, 1:length(S_without), S_without, label="Sains")
 lines!(ax2, 1:length(I_without), I_without, label="Infectieux")
 lines!(ax2, 1:length(D_without), D_without, label="Décédés")
 
 axislegend(ax2)
-save("evolution".png, f2)
-display(f2)
+
+f2
 
 # **Figure 2: Dynamique  temporelle de l’épidémie avec intervention**
 # Cette figure illustre l’évolution du nombre d’individus sains, infectieux et décédés au cours du 
@@ -512,6 +541,24 @@ display(f2)
 # les deux scénarios, tandis que la Figure 1 synthétise l’effet global de l’intervention sur plusieurs 
 # simulations. Ensemble, ces figures permettent d’évaluer à la fois l’effet moyen de l’intervention et 
 # la variabilité des trajectoires épidémiques.
+
+## Graphique pour le budget (simulation sans intervention)
+sim_with = run_simulation(L, 3750, 21000; with_intervention=true)
+
+budget_time = sim_with[7]  # 7e sortie = budget
+
+f_budget = Figure() ## Figure
+
+ax = Axis(
+    f_budget[1, 1],
+    xlabel = "Temps (ticks)",
+    ylabel = "Budget restant",
+    title = "Évolution du budget pendant la simulation"
+)
+
+lines!(ax, 1:length(budget_time), budget_time)
+
+f_budget
 
 # Les résultats du modèle sont obtenus à partir de 50 simulations indépendantes réalisées avec et sans 
 # intervention. Cette réplication permet de tenir compte de la variabilité inhérente au caractère stochastique 
