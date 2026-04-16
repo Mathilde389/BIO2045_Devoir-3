@@ -84,15 +84,21 @@
 # de cas confirmés (Kretzschmar et al, 2020). Cette stratégie utilise plus efficacement les
 # ressources sur le long terme.
 
-# Dans le modèle, une stratégie combinant un dépistage relativement massif ainsi qu’une
-# vaccination en anneau à été choisie. En effet, le dépistage relativement massif permet
-# d’identifier rapidement les individus infectieux. Une fois les cas détectés, la vaccination 
-#des contacts permet de limiter la propagation locale, ce qui créer une barrière immunitaire.
-# Cette stratégie a été choisie puisqu’elle permet de mieux utiliser les ressources. En effet,
-# les tests de dépistages coutent moins cher, et la vaccination en anneau permet de vacciner
-# moins de personnes. Cela permet donc une optimisation des ressources. La combinaison du
-# dépistage et de la vaccination en anneau constitue donc une stratégie efficace et réaliste
-# pour limiter la propagation d’une maladie infectieuse.
+
+
+# Dans le modèle, une stratégie combinant un dépistage ciblé progressif ainsi qu’une
+# vaccination en anneau a été choisie. Une fois les personnes identifiées comme infectieux,
+# les tests de dépistages sont réaliser. Le dépistage ciblé permet de tester les individus
+# porches des cas confirmés, ce qui permet une meilleure gestion des ressources. Une fois les
+# cas détectés, la vaccination des contacts permet de limiter la propagation locale, ce qui
+# créer une barrière immunitaire. Cette stratégie a été choisie puisqu’elle permet de mieux
+# utiliser les ressources. En effet, en testant uniquement les individus proches des cas
+# confirmés, les gens les plus probable d’être infectés sont testé, ce qui permet une meilleure
+# gestion des ressources. La combinaison du dépistage ciblé progressif et de la vaccination
+# en anneau constitue donc une stratégie efficace et réaliste pour limiter la propagation
+# d’une maladie infectieuse.
+
+
 
 
 
