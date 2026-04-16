@@ -466,9 +466,9 @@ hist(randn(1000), color=:grey80)
 # L’ajout de cet état permettrait de mieux représenter l’effet de la maladie sur la
 # population. 
 #
-#En ce qui concerne les types d’intervention, des simplifications ont été faites pour
-# la modélisation de la simulation. En effet, les tests de dépistages sont administrés
-# de manière aléatoire et sans priorisation. Dans des scénarios réels, certains groupes
+# En ce qui concerne les types d’intervention, des simplifications ont été faites pour
+# la modélisation de la simulation. En effet, les tests de dépistages sont seulement administrés
+# aux individus qui ont été en contact avec un cas confirmé. Dans des scénarios réels, certains groupes
 # de populations sont plus à risque que d’autres, par exemple les personnes âgées ou
 # les personnes immuno-déficientes lors du COVID-19 (Liu et al, 2021) (Chapman et al, 2025).
 # De plus, dans ce scénario, le vaccin est parfaitement efficace après deux générations
