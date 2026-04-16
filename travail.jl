@@ -83,7 +83,7 @@
 # Dans le modèle, une stratégie combinant un dépistage relativement massif ainsi qu’une
 # vaccination en anneau à été choisie. En effet, le dépistage relativement massif permet
 # d’identifier rapidement les individus infectieux. Une fois les cas détectés, la vaccination 
-#des contacts permet de limiter la propagation locale, ce qui créer une barrière immunitaire.
+# des contacts permet de limiter la propagation locale, ce qui créer une barrière immunitaire.
 # Cette stratégie a été choisie puisqu’elle permet de mieux utiliser les ressources. En effet,
 # les tests de dépistages coutent moins cher, et la vaccination en anneau permet de vacciner
 # moins de personnes. Cela permet donc une optimisation des ressources. La combinaison du
@@ -424,7 +424,7 @@ end
 
 using Statistics
 
-n_runs = 50
+n_runs = 50;
 
 results_with = [run_simulation(L, 3750, 21000; with_intervention=true) for _ in 1:n_runs]
 results_without = [run_simulation(L, 3750, 21000; with_intervention=false) for _ in 1:n_runs]
