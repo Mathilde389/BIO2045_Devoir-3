@@ -394,7 +394,7 @@ function run_simulation(L::Landscape, n::Int, budget_total; with_intervention=tr
                     positive = agent.infectious ? rand() <= 0.95 : rand() <= 0.05 ## Résultat du test (avec faux positifs et faux négatifs)
 
                     if positive ## Si test positif
-                        agent.infectious = false # Isolement des cas positifs pour empêcher la propagation de la maladie
+                        agent.tested = true # Isolement des cas positifs pour empêcher la propagation de la maladie
                         for neighbor in incell(agent, population) ## On vaccine tous les agents dans la même cellule
                             if budget >= 17 && !neighbor.vaccinated ## Si budget suffisant et agent non vacciné
                                 vaccinate!(neighbor) ## Vacciation du voisin
@@ -413,7 +413,7 @@ function run_simulation(L::Landscape, n::Int, budget_total; with_intervention=tr
         push!(S, length(healthy(population))) ## Enregistre le nombre d'agents sains
         push!(I, length(infectious(population))) ## Enregistre le nombre d'agents infectieux
         push!(D, deaths) ## Enregistre le nombre total de morts
-        push!(B, budget) ## 
+        push!(B, budget) ## Enregistre la progression du budget
     end
 
     ## Retourne: nombre total de morts, budget restant, liste des infections, historique S/I/D/B
