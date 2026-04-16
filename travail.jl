@@ -426,8 +426,8 @@ using Statistics
 
 n_runs = 50;
 
-results_with = [run_simulation(L, 3750, 21000; with_intervention=true) for _ in 1:n_runs]
-results_without = [run_simulation(L, 3750, 21000; with_intervention=false) for _ in 1:n_runs]
+results_with = [run_simulation(L, 3750, 21000; with_intervention=true) for _ in 1:n_runs];
+results_without = [run_simulation(L, 3750, 21000; with_intervention=false) for _ in 1:n_runs];
 
 # Une simulation pour visualisation (courbes temporelles)
 sim_with = run_simulation(L, 3750, 21000; with_intervention=true)
