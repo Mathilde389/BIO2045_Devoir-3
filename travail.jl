@@ -22,7 +22,7 @@
 # et la mortalité. En effet, cela représente un enjeu majeur en santé publique, surtout lorsque 
 # les individus infectés peuvent transmettre la maladie sans présenter de symptômes. 
 # Par exemple, dans le cas de la covid, le contrôle de la propagation de la maladie a été 
-# compliqué du aux individus porteurs asymptomatiques (Zhang et al, 2021).
+# compliqué du aux individus porteurs asymptomatiques (Zhang et al, 2022).
 
 # Afin de contrôler les épidémies, il est important de mettre en place des outils comme
 # le dépistage et la vaccination. Les tests de dépistages, comme les tests antigéniques
@@ -67,10 +67,10 @@
 # l’épidémie, les personnes à risques été vacciner en priorité.
 
 # La vaccination en anneau consiste à vacciner les contacts proches des individus infectés
-# (Henao-Restrepo et al, 2016). Cela permet de créer une barrière immunitaire. Cette stratégie
+# (Henao-Restrepo et al, 2017). Cela permet de créer une barrière immunitaire. Cette stratégie
 # permet de limiter localement la propagation de la maladie. Cette stratégie à été utilisé lors
 # des épidémies d’Ébola et a été efficace pour contrôler la transmission de la maladie
-# (Henao-Restrepo et al, 2016)
+# (Henao-Restrepo et al, 2017)
 
 # Pour le dépistage, il existe également différentes stratégies, comme le dépistage massif
 # et le dépistage ciblé.
