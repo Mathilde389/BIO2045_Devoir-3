@@ -92,59 +92,45 @@
 
 # # Présentation du modèle
 
-# Nous utilisons un modèle de simulation individu-centré pour représenter la
-# propagation d’une maladie infectieuse dans une population. Les modèles
-# individu-centrés permettent de représenter explicitement les interactions
-# entre individus et d’évaluer l’effet de différentes stratégies de contrôle,
-# notamment le dépistage et la vaccination (Adam & Arduin, 2023). Chaque
-# individu est représenté par un agent évoluant dans un espace discret
-# bidimensionnel (lattice) défini par des coordonnées allant de -50 à 50 sur les
-# axes x et y. La population initiale est composée de 3750 agents distribués
-# aléatoirement dans cet espace.
+# Nous utilisons un modèle de simulation individu-centré pour représenter la propagation d’une maladie infectieuse 
+# dans une population. Les modèles individu-centrés permettent de représenter explicitement les interactions entre 
+# individus et d’évaluer l’effet de différentes stratégies de contrôle, notamment le dépistage et la vaccination 
+# (Adam & Arduin, 2023). Chaque individu est représenté par un agent évoluant dans un espace discret bidimensionnel 
+# (lattice) défini par des coordonnées allant de -50 à 50 sur les axes x et y, avec des conditions de bord de type tore. 
+# La population initiale est composée de 3750 agents distribués aléatoirement dans cet espace.
 
-# Chaque agent possède plusieurs caractéristiques : une position spatiale, un
-# état sanitaire (infectieux ou sain), un compteur de durée d’infection (fixé à
-# 21 jours), ainsi qu’un identifiant unique. Lorsqu’un agent devient infectieux,
-# il le reste pendant toute la durée de la maladie, qui est toujours fatale dans
-# ce modèle. La population est initialement entièrement naïve, c’est-à-dire
-# qu’aucun individu ne possède d’immunité au départ.
+# Chaque agent possède plusieurs caractéristiques : une position spatiale, un état sanitaire (infectieux ou sain), un 
+# compteur de durée d’infection (fixé à 21 générations), un statut de test, ainsi qu’un statut vaccinal avec un délai 
+# avant efficacité. Lorsqu’un agent devient infectieux, il le reste jusqu’à la fin de sa période d’infection, après quoi 
+# il est retiré de la population, ce qui correspond à un décès. La population est initialement entièrement naïve, avec 
+# un seul cas index infectieux.
 
-# À chaque pas de temps (génération), les agents se déplacent aléatoirement dans
-# la grille. La transmission de la maladie se produit lorsqu’un agent infectieux
-# partage la même cellule qu’un agent sain. Dans ce cas, la probabilité de
-# transmission est fixée à 0,4. Les agents infectieux voient leur durée
-# d’infection diminuer à chaque génération, et sont retirés de la population
-# lorsque cette durée atteint zéro, ce qui correspond à leur décès.
+# À chaque pas de temps (tick), les agents se déplacent aléatoirement dans la grille. La transmission de la maladie se 
+# produit lorsqu’un agent infectieux partage la même cellule qu’un agent sain. Dans ce cas, la probabilité de transmission 
+# est fixée à 0,4, sauf si l’agent sain est vacciné et que le délai d’efficacité (2 générations) est atteint.
 
-# Afin de simuler une intervention sanitaire, un mécanisme combinant dépistage
-# et vaccination a été intégré au modèle. L’intervention est déclenchée
-# uniquement après la détection du premier décès dans la population. Une
-# stratégie de dépistage actif est alors mise en place à l’aide de tests
-# antigéniques rapides (RAT), qui permettent d’identifier les individus
-# infectieux avec une probabilité élevée (Lasser et al., 2021 ; Tran et al.,
-# 2023). Lorsqu’un cas est détecté, une intervention ciblée est appliquée à ses
-# contacts, ce qui reflète les approches modernes de contrôle en épidémiologie
-# (Lasser et al., 2021).
+# L’intervention sanitaire combine dépistage ciblé et vaccination en anneau, et est déclenchée après le premier décès 
+# observé dans la population. Elle est soumise à un budget total de 21 000 unités, avec un coût de 4 unités par test et de 
+# 17 unités par vaccination.
 
-# Dans ce modèle, les tests RAT présentent une probabilité de détection de 95 %,
-# pour un coût unitaire de 4 $, avec un budget total d’intervention fixé à 21
-# 000 $. Ils offrent donc un moyen rapide d’identifier les individus infectieux,
-# bien que leur sensibilité imparfaite puisse en limiter l’efficacité dans le
-# contrôle global de l’épidémie (Lasser et al., 2021).
+# Le dépistage est réalisé de manière périodique, tous les 5 ticks, une fois l’intervention déclenchée. À chaque cycle, 
+# jusqu’à 150 agents sont sélectionnés aléatoirement dans la population et testés à l’aide de tests antigéniques rapides. 
+# Ces tests présentent une probabilité de détection de 95 % pour les individus infectieux, ainsi qu’un faible taux de faux 
+# positifs (5 %) pour les individus sains (Lasser et al., 2021 ; Tran et al., 2023). Chaque agent ne peut être testé qu’une 
+# seule fois.
 
-# Lorsqu’un individu est testé positif, les agents présents dans la même cellule
-# spatiale (considérés comme ses contacts proches) peuvent être vaccinés, à
-# condition que le budget le permette. Le coût d’une vaccination est de 17$ par
-# individu. Le vaccin est entièrement efficace, mais son effet n’est actif
-# qu’après un délai de deux générations. Une fois le vaccin actif, l’agent ne
-# peut plus être infecté ni transmettre la maladie.
+# Lorsqu’un individu est testé positif, une intervention locale est mise en place : tous les agents présents dans la même 
+# cellule spatiale sont considérés comme des contacts proches et peuvent être vaccinés, sous contrainte budgétaire. Cette 
+# approche correspond à une stratégie de dépistage couplée à une vaccination ciblée de type « vaccination en anneau », 
+# visant à limiter la propagation autour des cas détectés.
 
-# La simulation se poursuit jusqu’à l’extinction de la maladie (absence
-# d’individus infectieux) ou jusqu’à un maximum de 2000 générations. Les
-# principales variables suivies sont le nombre d’individus sains et infectieux
-# au cours du temps, ainsi que le nombre total de décès, permettant d’évaluer
-# l’efficacité de la stratégie de vaccination en comparaison avec un scénario
-# sans intervention.
+# Le vaccin est administré uniquement aux contacts des cas positifs, si le budget le permet. Il est supposé parfaitement 
+# efficace après un délai de deux générations. Une fois ce délai écoulé, les individus vaccinés deviennent complètement 
+# immunisés et ne peuvent plus être infectés ni transmettre la maladie.
+
+# La simulation se poursuit jusqu’à l’extinction de la maladie (absence d’individus infectieux) ou jusqu’à un maximum de 
+# 2000 générations. Les principales variables suivies sont le nombre d’individus sains, infectieux et décédés, ainsi que 
+# l’évolution du budget, permettant d’évaluer l’efficacité de l’intervention.
 
 
 # # Implémentation
@@ -560,45 +546,28 @@ lines!(ax, 1:length(budget_time), budget_time)
 
 f_budget
 
-# Les résultats du modèle sont obtenus à partir de 50 simulations indépendantes réalisées avec et sans 
-# intervention. Cette réplication permet de tenir compte de la variabilité inhérente au caractère stochastique 
-# du modèle.
+# **Figure 4: Épuisement du budget lors de l'épidémie avec intervention**
+# Cette figure montre l’évolution du budget restant au cours du temps. Le budget diminue rapidement au début, 
+# indiquant une forte utilisation des ressources lors des premières phases de l’épidémie. Ensuite, la décroissance 
+# ralentit, puis atteint un plateau autour de 3 000, ce qui suggère qu’une partie du budget n’est pas utilisée
+# car l’épidémie est contrôlée avant la fin de la simulation.
 
-# En moyenne, le nombre de décès observé en présence d’une intervention est de 2425.32 individus, alors qu’il 
-# atteint 2739.9 individus en absence d’intervention. Cela correspond à une réduction moyenne d’environ 315 
-# décès lorsque le dépistage et la vaccination sont appliqués. Ainsi, l’intervention permet de diminuer la 
-# mortalité globale au sein de la population simulée.
-
-# La variabilité des résultats diffère également entre les deux scénarios. La variance du nombre de décès 
-# est de 389024.06 avec intervention, contre 669576.95 sans intervention. Les simulations avec intervention 
-# présentent donc une dispersion plus faible, indiquant des résultats plus homogènes d’une répétition à l’autre.
-
-# Le budget moyen restant à la fin des simulations avec intervention est de 1578.28, ce qui indique que la 
-# majorité des ressources disponibles est utilisée au cours de l’épidémie. En revanche, dans le scénario sans 
-# intervention, le budget demeure constant, puisqu’aucune dépense n’est effectuée.
-
-# Les dynamiques temporelles de l’épidémie sont illustrées par les courbes représentant l’évolution du nombre 
-# d’individus sains, infectieux et décédés. Sans intervention, le nombre d’individus infectieux augmente rapidement, 
-# entraînant une diminution rapide du nombre d’individus sains et une accumulation importante de décès. 
-# Avec intervention, l’augmentation du nombre d’infectieux est plus progressive, et la diminution des individus 
-# sains est ralentie, ce qui se traduit par un nombre total de décès plus faible.
-
-# L’analyse des événements d’infection révèle un total de 121 216 transmissions enregistrées au cours des simulations 
-# avec intervention. De plus, 73 344 agents infectieux uniques sont impliqués dans ces événements. La distribution 
-# du nombre d’infections causées par individu montre que la majorité des agents infectent un petit nombre d’individus, 
-# tandis qu’une minorité contribue à un nombre plus élevé de transmissions.
-
-# Dans l’ensemble, ces résultats mettent en évidence l’impact mesurable de l’intervention sur la réduction de la 
-# mortalité et sur la dynamique de propagation de la maladie, tout en illustrant la variabilité importante des 
-# trajectoires épidémiques entre simulations.
+# Les résultats reposent sur 50 simulations indépendantes avec et sans intervention, afin de tenir compte du 
+# caractère stochastique du modèle. En moyenne, le nombre de décès est de 2309,34 avec intervention contre 2910,88 
+# sans intervention, soit une réduction d’environ 601,54 décès. L’intervention permet donc de diminuer significativement 
+# la mortalité. La variabilité diffère toutefois entre les scénarios : la variance est plus élevée avec intervention 
+# (≈ 753 051) qu’en absence d’intervention (≈ 181 697), indiquant des résultats plus hétérogènes selon les simulations.
+# Le budget moyen restant avec intervention est d’environ 4377, ce qui suggère que toutes les ressources ne sont pas 
+# toujours utilisées avant la fin de l’épidémie. Globalement, ces résultats montrent que l’intervention ralentit la 
+# propagation de la maladie et réduit la mortalité, malgré une variabilité importante entre les simulations.
 
 # ## Discussion
-# Les résultats obtenus montrent que l’intervention basée sur le dépistage et la vaccination ciblée permet 
-# de réduire le nombre total de décès par rapport au scénario sans intervention. En moyenne, environ 314 
-# décès sont évités, ce qui indique que la stratégie mise en place est efficace pour limiter la propagation 
-# de la maladie. Cette réduction s’explique par le fait que le dépistage permet d’identifier rapidement 
-# une partie des individus infectieux et d’interrompre les chaînes de transmission, tandis que la vaccination 
-# des contacts proches diminue la probabilité de transmission locale (Adam & Arduin, 2023).
+# Les résultats obtenus montrent que l’intervention basée sur le dépistage et la vaccination ciblée permet de 
+# réduire de manière notable le nombre total de décès par rapport au scénario sans intervention. En moyenne, 
+# environ 601,54 décès sont évités, ce qui indique que la stratégie mise en place est efficace pour limiter 
+# la propagation de la maladie. Cette réduction s’explique par le fait que le dépistage permet d’identifier 
+# rapidement une partie des individus infectieux et d’interrompre les chaînes de transmission, tandis que la 
+# vaccination des contacts proches diminue la probabilité de transmission locale (Adam & Arduin, 2023).
 
 # La stratégie de vaccination implémentée correspond à une approche de vaccination en anneau, dans laquelle 
 # les individus en contact avec un cas détecté sont vaccinés de manière ciblée (Henao-Restrepo et al., 2017). 
@@ -607,41 +576,76 @@ f_budget
 # mais son efficacité dépend fortement de la rapidité du dépistage et de la capacité à intervenir avant que 
 # l’infection ne se diffuse à d’autres cellules.
 
-# Cependant, l’intervention ne permet pas d’éliminer complètement l’épidémie. Plusieurs facteurs expliquent 
-# cette efficacité partielle. D’une part, les tests antigéniques ne sont pas parfaitement sensibles, 
-# ce qui signifie qu’une fraction des individus infectieux n’est pas détectée et continue de transmettre 
-# la maladie (Adam & Arduin, 2023 ; Krauland et al., 2026). D’autre part, le vaccin n’est pas immédiatement 
-# efficace; le délai de deux générations avant l’acquisition de l’immunité laisse une période durant 
-# laquelle les individus vaccinés restent susceptibles. Enfin, la limitation du budget restreint le nombre 
-# total de tests et de vaccinations pouvant être réalisés, ce qui empêche une couverture complète de la population.
+# Cependant, l’intervention ne permet pas d’éliminer complètement l’épidémie. Plusieurs facteurs expliquent cette 
+# efficacité partielle. D’une part, les tests antigéniques ne sont pas parfaitement sensibles, ce qui signifie 
+# qu’une fraction des individus infectieux n’est pas détectée et continue de transmettre la maladie (Adam & Arduin, 2023 
+# ; Krauland et al., 2026). D’autre part, le vaccin n’est pas immédiatement efficace; le délai de deux générations avant 
+# l’acquisition de l’immunité laisse une période durant laquelle les individus vaccinés restent susceptibles. 
+# Enfin, la limitation du budget restreint le nombre total de tests et de vaccinations pouvant être réalisés, 
+# ce qui empêche une couverture complète de la population.
 
-# L’analyse du budget apporte un éclairage important sur l’efficacité de l’intervention. En moyenne, 
-# une partie du budget reste inutilisée à la fin des simulations, ce qui suggère que l’épidémie peut 
-# parfois s’éteindre avant que toutes les ressources ne soient déployées. Cela indique que le facteur 
-# limitant n’est pas uniquement la quantité de ressources disponibles, mais également le moment du 
-# déclenchement de l’intervention et la dynamique de propagation de la maladie. Toutefois, dans 
-# certaines simulations, une consommation plus rapide du budget limite la capacité à tester et 
-# vacciner de nouveaux individus au cours de l’épidémie. Cela met en évidence l’importance d’une 
-# allocation efficace et précoce des ressources pour maximiser l’impact des interventions.
+# L’analyse du budget apporte un éclairage important sur l’efficacité de l’intervention. En moyenne, un budget restant
+# d’environ 4377,18 est observé à la fin des simulations, ce qui suggère que l’épidémie peut parfois s’éteindre avant 
+# que toutes les ressources ne soient utilisées. Cela indique que le facteur limitant n’est pas uniquement la quantité 
+# de ressources disponibles, mais également le moment du déclenchement de l’intervention et la dynamique de propagation 
+# de la maladie. Toutefois, dans certaines simulations, une consommation plus rapide du budget limite la capacité à 
+# tester et vacciner de nouveaux individus au cours de l’épidémie. Cela met en évidence l’importance d’une allocation 
+# efficace et précoce des ressources pour maximiser l’impact des interventions.
 
-# Les résultats montrent également une forte variabilité entre les simulations, tant avec que 
-# sans intervention. Cette variabilité est liée au caractère stochastique du modèle, notamment 
-# dans les déplacements des agents et les événements de transmission (Adam & Arduin, 2023 ; 
-# Shakiba et al., 2021). Dans certains cas, l’épidémie s’éteint rapidement après peu de 
-# transmissions, tandis que dans d’autres, elle se propage largement dans la population. 
-# Cette variabilité reflète l’importance du hasard dans les dynamiques épidémiques, en 
-# particulier au début de l’épidémie (Shakiba et al., 2021 ; Karen et al., 2022).
+# Les résultats montrent également une forte variabilité entre les simulations, tant avec que sans intervention. Cette 
+# variabilité est particulièrement marquée dans le scénario avec intervention, où la variance des décès (≈ 753 051) est 
+# plus élevée que sans intervention (≈ 181 697). Cela indique que, bien que l’intervention réduise le nombre moyen de
+# décès, son effet est plus hétérogène selon les simulations. Dans certains cas, l’épidémie est rapidement contrôlée, 
+# tandis que dans d’autres, elle se propage largement malgré les mesures mises en place. Cette variabilité est liée au 
+# caractère stochastique du modèle, notamment dans les déplacements des agents et les événements de transmission 
+# (Adam & Arduin, 2023 ; Shakiba et al., 2021).
 
-# D’un point de vue épidémiologique, ces résultats sont cohérents avec les observations réelles. 
-# Ils soulignent l’importance des stratégies combinant dépistage et vaccination ciblée pour contrôler 
-# une épidémie (Adam & Arduin, 2023). Le modèle met également en évidence le rôle crucial du délai 
-# d’action des interventions; une réponse tardive ou une immunité retardée peut limiter l’efficacité 
-# globale des mesures (Krauland et al., 2026). Par ailleurs, la distribution du nombre d’infections 
-# secondaires suggère une propagation hétérogène, où certains individus infectent plusieurs autres,
-# tandis que la majorité en infecte peu. Ce phénomène est caractéristique des dynamiques de type 
-# « super-propagation », soit des situations où un petit nombre d’individus infectés est responsable 
-# d’un nombre disproportionné de transmissions, contribuant fortement à la diffusion globale de la 
-# maladie (Karen et al., 2022 ; Shakiba et al., 2021).
+# D’un point de vue épidémiologique, ces résultats sont cohérents avec les observations réelles. Ils soulignent 
+# l’importance des stratégies combinant dépistage et vaccination ciblée pour contrôler une épidémie (Adam & Arduin, 2023). 
+# Le modèle met également en évidence le rôle crucial du délai d’action des interventions; une réponse tardive ou 
+# une immunité retardée peut limiter l’efficacité globale des mesures (Krauland et al., 2026). Par ailleurs, 
+# la distribution du nombre d’infections secondaires suggère une propagation hétérogène, où certains individus 
+# infectent plusieurs autres, tandis que la majorité en infecte peu. Ce phénomène est caractéristique des dynamiques 
+# de type « super-propagation », soit des situations où un petit nombre d’individus infectés est responsable d’un 
+# nombre disproportionné de transmissions, contribuant fortement à la diffusion globale de la maladie 
+# (Karen et al., 2022 ; Shakiba et al., 2021).
+
+# Malgré les résultats obtenus, ce modèle présente plusieurs limites qui devraient être prises en compte lors de 
+# l’interprétation des résultats. Tout d’abord, la dynamique de transmission de la maladie utilisée dans cette 
+# simulation est très simplifiée. Par exemple, la probabilité d’infection est fixée à 0,4 pour tous les individus 
+# et toutes les interactions. Cependant, dans les situations réelles, la transmission dépend de plusieurs facteurs, 
+# comme la charge virale, la durée de contact et les caractéristiques individuelles (âge, état de santé, etc.) 
+# (Blaser et al., 2014). De plus, ces facteurs varient selon la maladie considérée : par exemple, la transmission 
+# du VIH dépend fortement de la charge virale (Blaser et al., 2014), tandis que celle de la COVID-19 dépend davantage 
+# de la proximité et de la durée des contacts (Karia et al., 2020). Cette simplification limite donc la capacité du 
+# modèle à refléter fidèlement la complexité des dynamiques réelles.
+
+# Une autre limite du modèle est que les agents se déplacent de manière aléatoire dans un environnement homogène. 
+# Cette modélisation ne prend pas en compte les structures sociales réelles. En pratique, les individus interagissent 
+# davantage au sein de groupes spécifiques (famille, école, travail), ce qui influence fortement la transmission des 
+# maladies (Mossong et al., 2008). L’absence de ces structures peut conduire à une mauvaise estimation de la vitesse 
+# et des schémas de propagation.
+
+# De plus, dans ce modèle, la maladie est toujours fatale, ce qui constitue une simplification importante. La plupart 
+# des maladies infectieuses présentent des taux de mortalité variables, avec une proportion d’individus qui guérissent
+# et développent une immunité naturelle (Szomolanyi et al., 2010). L’absence d’un état « rétabli » empêche de représenter 
+# ces dynamiques.
+
+# En ce qui concerne les interventions, certaines simplifications ont également été faites. Les tests sont uniquement
+# administrés aux individus ayant été en contact avec un cas confirmé, alors que, dans la réalité, certaines populations 
+# sont plus à risque (Liu et al., 2021 ; Chapman et al., 2025). De plus, le vaccin est supposé parfaitement efficace 
+# après deux générations, ce qui ne reflète pas les variations réelles d’efficacité vaccinale (Zachreson et al., 2023). 
+# Le modèle ne prend pas non plus en compte les mutations virales ni la nécessité de doses multiples (Behl et al., 2022).
+
+# Par ailleurs, l’intervention est déclenchée seulement après le premier décès, ce qui correspond à une réponse 
+# relativement tardive. Une intervention plus précoce, dès la détection des premiers cas, pourrait améliorer 
+# significativement les résultats (Kucharski et al., 2020). Il serait donc pertinent d’explorer différents scénarios 
+# de déclenchement.
+
+# Finalement, le caractère stochastique du modèle permet de représenter l’incertitude inhérente aux dynamiques 
+# épidémiques, mais il introduit également une forte variabilité des résultats. Bien que cette variabilité soit 
+# partiellement prise en compte par la répétition des simulations, une analyse plus approfondie permettrait 
+# d’identifier les paramètres les plus influents.
 
 # On peut aussi citer des références dans le document `references.bib`, qui doit
 # être au format BibTeX. Les références peuvent être citées dans le texte avec
