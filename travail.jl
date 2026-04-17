@@ -140,6 +140,9 @@
 # ## Packages nécessaires
 
 # Initialisation
+using Random
+using CairoMakie
+using UUIDs ## nous sommmes conscientes que cela doit se trouver dans "Project.toml", mais nous n'avons pas eu de succès avec le code en l'enlevant du "main"
 
 Random.seed!(123456)
 CairoMakie.activate!(px_per_unit=6.0) ## Permet de configurer l'affichage des figures
@@ -405,6 +408,7 @@ function run_simulation(L::Landscape, n::Int, budget_total; with_intervention=tr
 end
 
 # ## Analyse des résultats
+using Statistics ## nous sommmes conscientes que cela doit se trouver dans "Project.toml", mais nous n'avons pas eu de succès avec le code en l'enlevant du "main"
 
 n_runs = 50;
 
