@@ -33,7 +33,7 @@
 # des faux positives ou des faux négatifs. Les faux négatifs sont ceux qui mettent 
 # à risque le reste de la population puisqu’un individu infecté est identifié comme 
 # sain et peux donc infecter d’autres personnes. De plus les vaccins n’offrent pas 
-#toujours une protection immédiate, et il y a donc une période pendant laquelle les
+# toujours une protection immédiate, et il y a donc une période pendant laquelle les
 # individus vaccinés sont vulnérable. Le budget attribué aux stratégies de vaccination
 # est également une limite.
 
@@ -647,11 +647,4 @@ f_budget
 # partiellement prise en compte par la répétition des simulations, une analyse plus approfondie permettrait 
 # d’identifier les paramètres les plus influents.
 
-# On peut aussi citer des références dans le document `references.bib`, qui doit
-# être au format BibTeX. Les références peuvent être citées dans le texte avec
-# `@` suivi de la clé de citation. Par exemple: @ermentrout1993cellular -- la
-# bibliographie sera ajoutée automatiquement à la fin du document.
-
-# Le format de la bibliographie est American Physics Society, et les références
-# seront correctement présentées dans ce format. Vous ne devez/pouvez pas éditer
-# la bibliographie à la main.
+# ## Références
