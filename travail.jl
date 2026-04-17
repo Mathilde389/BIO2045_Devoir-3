@@ -18,7 +18,7 @@
 # et la mortalité. En effet, cela représente un enjeu majeur en santé publique, surtout lorsque 
 # les individus infectés peuvent transmettre la maladie sans présenter de symptômes. 
 # Par exemple, dans le cas de la covid, le contrôle de la propagation de la maladie a été 
-# compliqué du aux individus porteurs asymptomatiques (Zhang et al, 2021).
+# compliqué du aux individus porteurs asymptomatiques (Zhang et al, 2022).
 
 # Afin de contrôler les épidémies, il est important de mettre en place des outils comme
 # le dépistage et la vaccination. Les tests de dépistages, comme les tests antigéniques
@@ -33,7 +33,7 @@
 # des faux positives ou des faux négatifs. Les faux négatifs sont ceux qui mettent 
 # à risque le reste de la population puisqu’un individu infecté est identifié comme 
 # sain et peux donc infecter d’autres personnes. De plus les vaccins n’offrent pas 
-# toujours une protection immédiate, et il y a donc une période pendant laquelle les
+#toujours une protection immédiate, et il y a donc une période pendant laquelle les
 # individus vaccinés sont vulnérable. Le budget attribué aux stratégies de vaccination
 # est également une limite.
 
@@ -63,10 +63,10 @@
 # l’épidémie, les personnes à risques été vacciner en priorité.
 
 # La vaccination en anneau consiste à vacciner les contacts proches des individus infectés
-# (Henao-Restrepo et al, 2016). Cela permet de créer une barrière immunitaire. Cette stratégie
+# (Henao-Restrepo et al, 2017). Cela permet de créer une barrière immunitaire. Cette stratégie
 # permet de limiter localement la propagation de la maladie. Cette stratégie à été utilisé lors
 # des épidémies d’Ébola et a été efficace pour contrôler la transmission de la maladie
-# (Henao-Restrepo et al, 2016)
+# (Henao-Restrepo et al, 2017)
 
 # Pour le dépistage, il existe également différentes stratégies, comme le dépistage massif
 # et le dépistage ciblé.
@@ -80,15 +80,17 @@
 # de cas confirmés (Kretzschmar et al, 2020). Cette stratégie utilise plus efficacement les
 # ressources sur le long terme.
 
-# Dans le modèle, une stratégie combinant un dépistage relativement massif ainsi qu’une
-# vaccination en anneau à été choisie. En effet, le dépistage relativement massif permet
-# d’identifier rapidement les individus infectieux. Une fois les cas détectés, la vaccination 
-# des contacts permet de limiter la propagation locale, ce qui créer une barrière immunitaire.
-# Cette stratégie a été choisie puisqu’elle permet de mieux utiliser les ressources. En effet,
-# les tests de dépistages coutent moins cher, et la vaccination en anneau permet de vacciner
-# moins de personnes. Cela permet donc une optimisation des ressources. La combinaison du
-# dépistage et de la vaccination en anneau constitue donc une stratégie efficace et réaliste
-# pour limiter la propagation d’une maladie infectieuse.
+# Dans le modèle, une stratégie combinant un dépistage ciblé progressif ainsi qu’une
+# vaccination en anneau a été choisie. Une fois les personnes identifiées comme infectieux,
+# les tests de dépistages sont réaliser. Le dépistage ciblé permet de tester les individus
+# porches des cas confirmés, ce qui permet une meilleure gestion des ressources. Une fois les
+# cas détectés, la vaccination des contacts permet de limiter la propagation locale, ce qui
+# créer une barrière immunitaire. Cette stratégie a été choisie puisqu’elle permet de mieux
+# utiliser les ressources. En effet, en testant uniquement les individus proches des cas
+# confirmés, les gens les plus probable d’être infectés sont testé, ce qui permet une meilleure
+# gestion des ressources. La combinaison du dépistage ciblé progressif et de la vaccination
+# en anneau constitue donc une stratégie efficace et réaliste pour limiter la propagation
+# d’une maladie infectieuse.
 
 # # Présentation du modèle
 
@@ -138,10 +140,6 @@
 # ## Packages nécessaires
 
 # Initialisation
-
-using Random
-using CairoMakie
-using UUIDs
 
 Random.seed!(123456)
 CairoMakie.activate!(px_per_unit=6.0) ## Permet de configurer l'affichage des figures
@@ -407,8 +405,6 @@ function run_simulation(L::Landscape, n::Int, budget_total; with_intervention=tr
 end
 
 # ## Analyse des résultats
-
-using Statistics
 
 n_runs = 50;
 
